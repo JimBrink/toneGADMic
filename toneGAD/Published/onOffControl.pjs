@@ -1,0 +1,80 @@
+/* This class creates a onOff control in a div.  The response to a 
+ * button click is determined by the global function onOffClicked().
+ * Its on and off text values are specified when constructed.  The 
+ * initial value is the on value.  
+ * 
+ * The button can be accessed using document.getElementById("onOff"). 
+ *
+ * Sample onOffClicked is included.
+ * 
+ * JB   1/31/2020
+ */
+class OnOffControl {
+  /**
+   * constructor where the colors are HTML/CSS color names or values
+   */
+  constructor(itsWidth, itsOnText, itsOffText)
+  {
+    // save some arguments
+    this.divWidth = itsWidth;
+    this.onText = itsOnText;
+    this.offText = itsOffText;
+    // declare button and light
+    this.onOffButton; 
+    this.onOffLightSpan;
+    // the styles
+    this.buttonStyle = "position: relative"
+        + "; display: inline-block;"
+        + "; width: " + (.7 * itsWidth) + "px"
+        + "; height: 30px"
+        + "; border-radius: 14px"
+        + "; margin-top: 10px"; 
+    this.onOffLightOffStyle = "font-size:50px; color: gray; margin-bottom: 20px"
+    this.onOffLightOnStyle = "font-size:50px; color: red; margin-bottom: 20px"
+
+  } // end constructor
+  /**
+   * Creates a div for the ...
+   */
+  setupControl() {
+    let onOffDiv = createFaceplateDiv('ON / OFF', this.divWidth);
+
+    this.onOffPara = createP("");
+    this.onOffPara.parent(onOffDiv);
+
+    this.onOffButton = createButton(this.onText);
+    this.onOffButton.mouseClicked(function(){onOffClicked();});
+    this.onOffButton.style(this.buttonStyle);
+    this.onOffButton.id("onOff");
+    this.onOffButton.parent(onOffDiv);
+    this.onOffLightSpan = createSpan("&#9679");
+    this.onOffLightSpan.style(this.onOffLightOffStyle);
+    this.onOffLightSpan.parent(onOffDiv);    
+  }  // end setupControl
+  
+  turnOn() {
+    this.onOffButton.html(this.offText);
+    this.onOffLightSpan.style(this.onOffLightOnStyle);
+  } // turnOn
+  turnOff() {
+    this.onOffButton.html(this.onText);
+    this.onOffLightSpan.style(this.onOffLightOffStyle);
+  } // turnOff
+  
+} // class onOffControl
+
+function onOffClicked() {
+  if (!playing) {
+    onOff.turnOn();
+    // ramp amplitude to 0.5 over 0.05 seconds
+    osc.amp(volume.currentVolume/100, 0.05);
+    playing = true;
+    backgroundColor = color(0,255,255);
+  } else {
+    onOff.turnOff()
+    // ramp amplitude to 0 over 0.5 seconds
+    osc.amp(0, 0.5);
+    playing = false;
+    backgroundColor = color(0,255,255);
+  }
+} // onOffClicked

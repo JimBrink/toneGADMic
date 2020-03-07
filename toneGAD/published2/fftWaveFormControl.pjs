@@ -1,0 +1,191 @@
+//  Revised 2/22/2020
+class FFTWaveFormControl {
+  constructor(itsWidth, itsHeight, itsParent) {
+    
+    this.divWidth = itsWidth;
+    this.divHeight = itsHeight;
+    this.divParent = itsParent;
+    
+    this.FFTSpan;  // displays frequency
+    this.peakCheck;  // check box for displaying peaks
+    
+    this.FFTOptions = ["Continually", "10 times/sec", "4 times/sec", "1 time/sec"];
+    this.FFTOptionValues = [1, 6, 15, 60];
+    this.displayEvery = this.FFTOptionValues[0];  // frequency wave display
+    
+    this.waveDisplayWidth = width - 20;
+    this.waveDisplayHeight = 170;
+
+    this.analDisplayHeight = 130;
+    this.analDisplayTop = this.waveDisplayHeight + 35;
+    this.analDisplayWidth = width - 20;
+    this.analImageHeight = this.analDisplayHeight - 20;
+    this.analImageBottom = this.analDisplayTop + this.analImageHeight;
+    this.analLabelTop = this.analDisplayTop + this.analImageHeight;
+ 
+    this.fft;
+    this.analyze = [];
+    this.peakBins = [];
+    this.displayPeaks;
+    
+    this.buttonWidthStyle = "width: " + (0.8 * itsWidth) + "px";
+    
+     }  //end constructor
+  /**
+   * Creates a div for the displaying the wave form and
+   * sets up the buttons in the that div
+   */
+   
+  setupFFTWaveFormControl() {
+    let FFTDiv = createFaceplateDiv("FFT<br>Update rate(HZ)",
+         this.divWidth, this.divHeight, this.divParent);
+    this.FFTSpan = createDisplaySpan(FFTDiv); 
+    this.FFTSpan.html(" &nbsp; &nbsp ");    
+    this.fft = new p5.FFT();
+    this.pgWave = createGraphics(this.waveDisplayWidth, this.waveDisplayHeight);
+    this.pgAnal = createGraphics(width-10, 170);
+    let FFTDiv3 = createDiv();
+    FFTDiv3.parent(FFTDiv);
+    let FFTButtons = [];
+    for (let i = 0; i < this.FFTOptions.length; i++) {
+      let f = this.FFTOptions[i];
+      let v = this.FFTOptionValues[i]; 
+      FFTButtons[i] = createButton(f); 
+      FFTButtons[i].mousePressed(function() {setFFTOption(v);});
+      FFTButtons[i].style(this.buttonWidthStyle);
+      FFTButtons[i].parent(FFTDiv3);
+    }
+    
+    this.peakCheck = createCheckbox("Show peaks");
+    this.peakCheck.parent(FFTDiv);
+    this.peakCheck.changed(clickPeakCheck);
+    this.displayPeaks = false;
+
+    let para = createP("&nbsp;");  // in case the control's height is not set
+    para.parent(FFTDiv);
+    
+     setFFTOption(this.FFTOptionValues[2]);    // set default update rate
+  } //  end setupFFTWaveFormControl
+
+  
+  drawFFTWaveFormControl() {
+    // Wave display
+    if (frameCount 
+          / this.displayEvery - round(frameCount / this.displayEvery) == 0)
+    {
+       let waveform = this.fft.waveform(); // analyze the waveform
+       this.pgWave.background(255);
+       this.pgWave.beginShape();
+       this.pgWave.strokeWeight(1);
+       for (let i = 0; i < waveform.length; i++) {
+          let x = map(i, 0, waveform.length, 0, this.waveDisplayWidth );
+          let y = map(waveform[i], -1, 1, this.waveDisplayHeight - 5, 0);
+          vertex(x, y);
+       }
+       this.pgWave.endShape();
+    }
+    image(this.pgWave, 10,10, this.waveDisplayWidth, this.waveDisplayHeight);
+    
+    // anal display
+
+    strokeWeight(0);
+    fill(255); // color of anal display background
+    rect(10, this.analDisplayTop, 
+           this.analDisplayWidth, this.analDisplayHeight+35);
+    this.peakBins = [];
+    let peakVal = 0;
+    let peakValAt = -5;
+    this.analyze = this.fft.analyze(); // analyze the waveform
+     
+    strokeWeight(1);
+    stroke(color(0, 0, 255));
+    // check each bin
+    for (let i = 0; i < this.analyze.length; i++) {
+      // check for peak.  This analysis does not allow peak at right end
+      // 180 is an arbitary cutoff 
+      if (this.analyze[i] > peakVal && this.analyze[i] > 180) {
+        peakVal = this.analyze[i];
+        peakValAt = i;
+      } else {
+        if (i == peakValAt + 1) {
+          this.peakBins[this.peakBins.length] = peakValAt;
+        } 
+        peakVal = this.analyze[i];
+      }
+      // draw line on graph
+      line(this.x(i), this.analImageBottom,
+               this.x(i), this.yAnal(i));
+    }
+  
+    // anal Hz chart labels
+    fill(color(255, 0, 0));
+    stroke(color(255, 0, 0));
+    strokeWeight(2);
+    for (let f = 1000; f <= 23000; f += 1000 ) {
+      ellipse(this.x(.0427 * f - 0.96665), this.analLabelTop + 10, 4, 4);
+    }
+    strokeWeight(1);
+    for (let f = 2000; f <= 23000; f+=2000) {
+      text(f, this.x(.04272 * f + 0.03867), this.analLabelTop + 25);
+    }
+    /*  Keep this section for possible future use.
+     // anal bin number labels 
+    for (let i = 32; i < this.analyze.length; i+=32) {
+      ellipse(this.x(i), this.analLabelTop + 32, 2, 2);
+    } 
+   
+    for (let i = 64; i < this.analyze.length; i+=64) {
+      text(i, this.x(i), this.analLabelTop + 47);
+    }
+   */
+
+    // Bins and approximate frequencies
+    if (this.displayPeaks) {
+      fill(color(0, 128, 0));
+      if (this.peakBins.length > 0) {
+        text("Peak frequencies", 725, 15 + this.analDisplayTop);
+      }
+      for (let i = 0; i < this.peakBins.length & i < 6; i++) {
+        let b = this.peakBins[i];
+        let f = round(23.40633 * (b + 1) - .90501);
+        text( /*b + */"   ~" + f  + "Hz", 750, 35 + 12 * i + this.analDisplayTop);
+      }
+     }
+    
+    if (frameCount % 200 == 0) {
+      this.FFTSpan.html("&nbsp " + round(frameRate()/fftWaveForm.displayEvery)
+             + " &nbsp");
+    }
+  }  // drawFFTWaveFormControl
+  
+  // Locate i's x value for analysis image
+  x(i) {
+    return 10 + map(i, 0, this.analyze.length, 0, this.analDisplayWidth);
+  } // end x
+
+  // locate i's y value for analysis image
+  yAnal(i) {
+    return this.analImageBottom
+         - map(this.analyze[i], 0, 255, 0, this.analImageHeight);
+  }  // end yAnal
+
+}  // end class
+
+
+// ** uses variable name from osc.pjs  so not self contained **
+function setFFTOption(x) {
+  fftWaveForm.displayEvery = x;
+  fftWaveForm.FFTSpan.html("&nbsp;  " + round(frameRate()/fftWaveForm.displayEvery)
+           + " &nbsp;");
+}  // setFFTOption           
+
+function clickPeakCheck() {
+  fftWaveForm.displayPeaks = !fftWaveForm.displayPeaks;
+  if (fftWaveForm.displayPeaks) { 
+    alert("Warning\nThe values displayed are not accurate."
+       + " The software only allows 1024 different frequencies"
+       + " to be shown so each frequency has a range of about 24"
+       + " Hz.  For example, 100 Hz dislays as 93 Hz.");
+  }
+}  // clickPeakClick   
+

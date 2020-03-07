@@ -1,0 +1,134 @@
+//  Graphing Convergence of Fourier Sine Series
+//  James  Brink,  2/24/2020
+
+let f = 0;
+let m;
+let n;
+let mSlider;
+let nSlider;
+
+function setup() {
+  createCanvas(722, 270);
+  createSpan("&nbsp;n =&nbsp");
+  nSpan = createSpan(" ");
+  nSlider = createSlider(1, 100, 0);
+  createSpan("&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; "
+          + "&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; m = &nbsp");
+  mSpan = createSpan(" ");
+  mSlider = createSlider(1, 10, 1);
+
+  createSpan("<br>");
+  let sqButton = createButton("Sum sin(m*i*x)/i  for i = 1, 3, 5, ..., n");
+  sqButton.mousePressed(function () { f = 0;});
+  createSpan("<br>");
+  let sawButton = createButton("Sum sin(m*i*x)/i for i = 1, 2, 3,  ..., n)")
+  sawButton.mousePressed(function () { f = 1; });
+  createSpan("<br>");
+  let triButton = createButton("Sum +/- sin(m*i*x)/(i * i) for i = 1, 3, 5, ..., n )");
+  createSpan(" (Here +/- means every other term is subtracted)");
+  triButton.mousePressed(function () { f = 3;});
+  createSpan("<br><br><br><br>These wave commonly called square waves,"
+        + " sawtooth waves and triangular waves.");
+  createSpan("<br><br>James Brink &nbsp; &nbsp; &nbsp; &nbsp; 2/24/2020");
+
+  angleMode(DEGREES);
+} // setup
+
+function draw() {
+   background(200);
+   fill(color(144, 0, 0));
+   // determine m and n
+   m = mSlider.value();
+   mSpan.html(m + " &nbsp; period = "
+          +(round(36000/m)/100) + "<sup>o</sup> &nbsp; ");
+   n = nSlider.value();
+   nSpan.html(n);
+   // label 3 points
+   noStroke();
+   text("0", 3, 230);
+   text("360", 350, 230);
+   text("720", 700, 230);
+   // show periods
+   stroke(color(165, 42, 42));
+   for (let i = 0; i <= 2 * m; i++)  {
+       drawingContext.setLineDash([2, 10]);
+       let p = 360 * i/m;
+       line(p, 0, p, 200);
+       drawingContext.setLineDash([]);
+   }
+  // evaluate the functions
+   if (f == 0) {  // the square wave
+      n = 2 * nSlider.value() - 1;  // only use odd harmonics
+      squareWave(n);
+      noStroke();
+      fill(color(0, 0, 255));
+      text("Sum sin(i*x)/i  for i = 1, 3, 5, ..., " + n, 40, 255);
+      text("Coefficient function: 1/i", 360, 245);
+      text("Coefficients: 1, 0, 1/3, 0, 1/5, 0, 1/7, 0, 1/9, 0, ...", 360, 260);
+  } else if (f == 1) {  // the sawtooth wave
+     n = nSlider.value();  // uses all harmonics
+     sawWave(n);
+     noStroke();
+     fill(color(0, 0, 255));
+     text("Sum sin(m*i*x)/i for i = 1, 2, 3, ..., " + n , 40, 255);
+     text("Coefficient function: 1/i", 360, 245);
+     text("Coefficients:  1, 1/2, 1/3, 1/4, 1/5, 1/6, 1/7, 1/8, 1/9,  1/10, ...",
+             360, 260);
+ } else if (f == 3) {   // the triangle wave
+     n = 2 * nSlider.value() - 1;   // uses only odd harmonics
+     triWave(n);
+     noStroke();
+     fill(color(0, 0, 255));
+     text("Sum +/- sin(i * x)/(i * i) for i =1, 3, 5,..., " + n, 40, 245);
+     text("(Here +/- means every other term is subtracted)", 40, 260);
+     text("Coefficient function: +/-1/(i*i)", 360, 245);
+     text("Coefficients: (1, 0, -1/9, 0, 1/25, 0, -1/49, 0, 1/81, ...", 360, 260);
+ }
+}  // draw
+
+// draw a triangle wave
+function triWave(n) {
+  stroke(color(255, 0, 0));
+  noFill();
+  beginShape();
+     for (x = 0; x < 720; x++) {
+        let s = 0;
+        sign = 1;
+        for (let i = 1; i <= n; i += 2) {
+            s += sign * sin(m * i * x)/(i*i);
+            sign = - sign;
+        }
+        vertex( x, -60 * s + 95);
+     }
+  endShape();
+} // end triWave
+
+// draw a sawtooth wave
+function sawWave(n) {
+  stroke(color(255, 0, 0));
+  noFill();
+  beginShape();
+     for (x = 0; x < 720; x++) {
+        let s = 0;
+        for (let i = 1; i <= n; i++) {
+            s += sin(m * i *  x) /i;
+        }
+        vertex( x, -50 * s + 100);
+     }
+  endShape();
+} // end sawWave
+
+// draw a square wave
+function squareWave(n) {
+  stroke(color(255, 0, 0));
+  noFill();
+  beginShape();
+     for (x = 0; x < 720; x++) {
+        let s = 0;
+        for (let i = 1; i <= n; i += 2) {
+            s += sin(m * i * x)/i;
+        }
+        vertex( x, -60 * s + 75);
+     }
+  endShape();
+} // end squareWave

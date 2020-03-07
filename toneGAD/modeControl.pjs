@@ -11,8 +11,6 @@ let releaseTime = 0.4;
 let releaseLevel = 0;
 
 let aKeyIsDown = false;
-let micAudioIn = null;
-let micVolume = 0;  // used for mic lights
 
 class ModeControl {
   /**
@@ -32,7 +30,7 @@ class ModeControl {
    * Creates a div for the ...
    */
   setupControl() {
-    let modeCtrlDiv = createFaceplateDiv('MODE', this.divWidth,
+    let modeCtrlDiv = createFaceplateDiv('MODE<br>&nbsp;', this.divWidth,
         this.divHeight, this.divParent);
 
     let checkDiv = createDiv();
@@ -50,27 +48,15 @@ class ModeControl {
     this.harmonicsModeCheck = createCheckbox("Harmonics", false);
     this.harmonicsModeCheck.parent(checkDiv);
     this.harmonicsModeCheck.changed(harmonicsModeCheck);
-    this.micModeCheck = createCheckbox("Microphone", false);
-    this.micModeCheck.parent(checkDiv);
-    this.micModeCheck.changed(micModeCheck);
-    this.micDiv = createDiv();
-    this.micDiv.parent(checkDiv);
-    this.micDiv.style("display:none");
-    let micVolLbl = createSpan("Mic volume");
-    micVolLbl.parent(this.micDiv);
-    micVolLbl.style("text-size:8px");
-    this.micVolSlide = createSlider(0, 100, 0);
-    this.micVolSlide.parent(this.micDiv);
-    this.micVolSlide.input(micVolSlideInput);
-    this.micVolSlide.style("width: 135px;");
-  //   spaceDiv.parent(modeCtrlDiv);
+    let spaceDiv = createDiv("&nbsp;");
+    spaceDiv.parent(modeCtrlDiv);
 
     this.hintButton = createButton("Piano Note Keys");
     this.hintButton.mousePressed(hintButton);
     this.hintButton.parent(modeCtrlDiv);
     this.hintButton.style("width: " + (.92 * this.divWidth) + "px");
 
-  let spaceDiv2 = createDiv("&nbsp;");
+    let spaceDiv2 = createDiv("&nbsp;");
     spaceDiv2.parent(modeCtrlDiv);
   }  // end setupControl
 
@@ -82,7 +68,6 @@ function turnAllChecksOff() {
   modeCtrl.toneModeCheck.checked(false);
   modeCtrl.pianoModeCheck.checked(false);
   modeCtrl.harmonicsModeCheck.checked(false);
-  modeCtrl.micModeCheck.checked(false);
 }  // turnAllChecksOff
 
 function offModeCheck() {
@@ -102,7 +87,6 @@ function toneModeCheck() {
     keyReleased();
   }
   modeCtrl.mode = "tone";
-  turnMicOff();
   turnAllChecksOff();
   modeCtrl.toneModeCheck.checked(true);
   playing = true;
@@ -125,8 +109,7 @@ function harmonicsModeCheck() {
   }
   modeCtrl.mode = "harmonics";
   harmonic.harmonicDiv.style("display:block");  // display the harmonic controls
-  //                                                                                     if needed
-  turnMicOff();
+  //                                                                                        if needed
   setWaveType("sine");
   turnAllChecksOff();
   modeCtrl.harmonicsModeCheck.checked(true);
@@ -134,104 +117,6 @@ function harmonicsModeCheck() {
   turnSoundOn();
 } // harmonicsModeCheck
 
-function micModeCheck() {
-  if (aKeyIsDown) {
-    keyReleased();
-  }
-  modeCtrl.mode = "mic";
-  modeCtrl.micDiv.style("display:block");
-  turnSoundOff();
-  turnAllChecksOff();
-  modeCtrl.micModeCheck.checked(true);
-  playing = false;
-  turnSoundOn();
-  setupMic();
-} // micModeCheck
-
-// ** functions for the mic mode **
-
-// turns the mic off by setting gain to 0.
-function turnMicOff() {
-  if (micAudioIn != null) {
-     micAudioIn.amp(0);  // turns mic off
-  }
-}  //  turnMicOff
-
-/**
- * set the mic's gain correspoinding to slide value
- */
-function micVolSlideInput() {
-  micVolume = modeCtrl.micVolSlide.value()/100;
-  if (modeCtrl.mode == "mic") {
-     micAudioIn.amp(micVolume);
-  }
-}  // micVolSlideInput
-
-/**
- * Sets up the mic.  If the mic is not already on, it creates and starts it. If
- * it already is on, it just sets the initial mic gain according to the mic volume
- * slide.
- */
-function setupMic() {
-  if (micAudioIn == null) {
-     try {
-        micAudioIn = new p5.AudioIn();
-       micAudioIn.start();
-       } catch(err) {
-        alert("Cannot start" + "\n" +err + "\n" + err.name + "\n" + err.message);
-     }
-      micAudioIn.connect(mixerGain);
-  }
-
-  micAudioIn.amp(micVolume);
-//  listMembersArray(micAudioIn.gain);
-
-}  // setupMic
-
-/**
- * this draw function is called by the main draw method.
- */
-function drawMicDisplay() {
-if (micAudioIn != null) {
-  if (modeCtrl.micVolSlide.value() == 0) {
-     fill(color(80, 80, 255));
-     stroke(color(0, 0, 255))
-     rect(250, 80, 300, 80);
-     fill(color(255, 255, 0));
-     noStroke();
-     text("You will need to turn up the Mic Volume"
-           + "\nuntil the right red light blinks occacionally"
-           + "\nat normal sound levels.", 400, 105); 
-
-  }1
-  // mic volume lights
-  let c = [];
-  c[0] = color(255, 255, 0);
-  c[1] = color(255, 192, 0);
-  c[2] = color(192, 255, 0);
-  c[3] = color(0, 255, 0);
-  c[4] = color(255, 80, 0);
-  c[5] = color(255, 0, 0);
-
-  let h = 195;
-  let v = micAudioIn.getLevel();
-  fill(color(255, 255, 255));
-  noStroke();
-  text("Mic volume (" + (round(1000 * v) /1000) + ")", 200, h);
-  for (let i = 0; i < 6; i++) {
-     if (v >= .025 * i + .040) {
-        fill(c[i]);
-     } else {
-        fill(255);
-     }
-     ellipse(350 + 20 * i, h-3, 7);
-  }
-  text( "Mic vol slide setting: " + modeCtrl.micVolSlide.value(), 600, h);
-  }
-} // drawMicDisplay
-
-// functions for the piano
-//
 // when a key is typed, interpret key, determine midi, and change frequency
 function keyTyped() {
   if (modeCtrl.mode === "piano") {

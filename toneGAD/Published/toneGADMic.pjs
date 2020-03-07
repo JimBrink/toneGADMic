@@ -1,0 +1,112 @@
+ /* Original source: https://p5js.org/reference/#/p5.Oscillator 
+https://p5js.org/examples/sound-oscillator-frequency.html
+  * Much Modified by JB      2/17/2020
+  */
+
+let osc;
+let playing = false;
+
+function setup() {
+  createCanvas(800, 380);
+  backgroundColor = color(0,0,0);
+  textAlign(CENTER);
+  createP("");  // put a paragraph after the canvas to seperate it from the divs.
+ 
+  osc = new p5.Oscillator();
+  osc.setType('sine');
+    
+  keyBoard = new KeyboardControl(100, 195, 0);
+  keyBoard.setupControl();
+  volume = new VolumeControl(200, 195, 0);  
+  volume.setupVolumeControl();
+  wave = new WaveControl(130, 195, 0);
+  wave.setupWaveControl();
+  freq = new FrequencyControl(200, 195, 0);  
+  freq.setupFrequencyControl();  
+  fftWaveForm = new FFTWaveFormControl(120, 195, 0); 
+  fftWaveForm.setupFFTWaveFormControl(); 
+This pen was handcrafted.html
+  playing = false;
+  osc.amp(0);
+  osc.start();
+}  // end setup
+
+function draw() {
+  background(backgroundColor)
+  fill (backgroundColor);
+  strokeWeight(10);
+  stroke(192);
+  rect(0, 0, width, height);
+  
+  freq.respondToFreqSliderMoved()
+  respondToVolSliderMoved();
+  fftWaveForm.drawFFTWaveFormControl();
+}  // end draw
+
+/**
+ * Global functions
+ */
+ 
+let faceplateTextColor = "gold";
+let faceplateBorderColor = "silver";
+let faceplateBackgroundColor = "black";
+ 
+/**
+ * Creates a division for a Faceplate. The division has
+ * a background color, border color, text color, name, and
+ * optionally width, height, and parent.
+ * Parameters:
+ * itsName:  name written at top of division
+ * itsWidth:  width of division (optional, unspecified if <=0)
+ * itsHeight: height of division (optional, unspecified if <=0)
+ * itsParent: parent into division is placed.  (optional, unused if =0)
+ * Returns
+ * pointer to division
+ */
+function createFaceplateDiv(itsName, itsWidth, itsHeight, itsParent) {
+  let style =  "float: left"
+        + "; border-width: 5px"
+        + "; border-style: solid"
+        + "; text-align: center"
+        + "; background-color: " + faceplateBackgroundColor 
+        + "; color: " + faceplateTextColor
+        + "; border-color: " + faceplateBorderColor;
+  if (itsWidth > 0) {
+    style += "; width: " + itsWidth + "px";
+  }
+  if (itsHeight > 0) {
+    style += "; height: " + itsHeight + "px";
+  }
+   let div = createDiv(itsName);
+  if (itsParent != 0) {
+    div.parent = itsParent;
+  }
+  div.style(style);
+  return div;
+} // end createFaceplateDiv
+
+let displayBackgroundColor = "white";
+let displayTextColor = "red";
+
+/**
+ * Creates an Display span in the parent
+ * Returns:
+ *   Pointer to the span
+ */
+function createDisplaySpan(itsParent) {
+  let style = "text-align: center"
+      + "; background-color: " + displayBackgroundColor
+      + "; color: " + displayTextColor
+      + "; font-size: x-large";
+  div = createDiv();
+  div.parent(itsParent);
+  let span = createSpan();
+  span.parent(div);
+  span.style(style);
+  return span;  
+}  // end createDisplaySpan      
+      
+  
+
+
+

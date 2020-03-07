@@ -1,0 +1,160 @@
+/* This class is self-contained
+ * except it requires the global function:
+ * setVolume(v) - changes the slider position, the osc volume and the
+ *                   display.
+ *
+ * Includes two global functions that are needed at the end of this file.
+ *
+ * The oscilators and master mixer prefer inputs from -1 to 1
+ * where negative values invert the signal.  Larger values may
+ * distort the signal.
+ * The displayed volumes are from volumeDisplayMin to
+ * volumeDisplayMax  (-100 to 100) but initially volumeDisplayMin
+ * is set to 0 to avoid inverting the signals.  
+ * The slider only allows integer values from  0 to volumeSliderMax.
+ * 
+ * The oscilators and master mixer values are 1/100 of the display
+ * value = current value.
+ * 
+ * invertChanged includes a call to harmonics control.
+ *
+ * JB   3/6/2020
+ */
+
+let volume;
+const volumeSliderMax =  1000;
+const volumeDisplayMax = 100;
+let volumeDisplayMin = 0;
+
+class VolumeControl{
+  /**
+  * constructor where the colors are HTML/CSS color names
+  */
+  constructor(itsWidth, itsHeight, itsParent) {
+    this.controlWidth = itsWidth;
+    this.controlHeight = itsHeight;
+    this.controlParent = itsParent;
+    this.volumeSpan;  // displays volume
+    this.volSlide;
+    this.volumeOptions = ["pp", "p", "mp", "mf", "f", "ff"];
+    this.volumes = [volumeDisplayMax/6, volumeDisplayMax/3,
+                              volumeDisplayMax/2, 2 * volumeDisplayMax/3,
+                              5 * volumeDisplayMax/6, volumeDisplayMax];
+    this.currentVolume;  // displayed volume
+
+    this.buttonWidthStyle = "width: " + (.45 * this.controlWidth) + "px";
+    this.slideWidthStyle = "width: " + (.85 *  this.controlWidth) + "px";
+  } // end constructor
+
+  /**
+   * Creates a div for the displaying the volume form and
+   * sets up the buttons in the that div
+   */
+  setupVolumeControl() {
+    let volumeDiv = createFaceplateDiv('VOLUME<br>&nbsp;',
+    this.controlWidth, this.controlHeight, this.ControlParent);
+    this.volumeSpan = createDisplaySpan(volumeDiv, 50);
+
+    let volumeDiv2 = createDiv();
+    volumeDiv2.parent(volumeDiv);
+    let volumeButtons = [];
+    for (let i = 0; i < this.volumeOptions.length; i++) {
+      let v = this.volumeOptions[i];// for some reason, waveOptions doesn't work in function call
+      let vVal = this.volumes[i];
+      volumeButtons[i] = createButton(v);
+      volumeButtons[i].mousePressed(function() { setVolume(vVal);});
+      volumeButtons[i].style(this.buttonWidthStyle);
+      volumeButtons[i].parent(volumeDiv2);
+    }
+
+    this.volSlide = createSlider(0, volumeSliderMax, volumeSliderMax/2);
+    this.volSlide.style(this.slideWidthStyle);
+    this.volSlide.parent(volumeDiv);
+    this.volSlide.input(respondToVolSliderMoved);
+    this.invertChk = createCheckbox("Allow inversion", false);
+    this.invertChk.parent(volumeDiv);
+    this.invertChk.changed(invertChanged);
+    setVolume(volumeDisplayMax/2);  // osc volume
+  } // end setupVolumeControl
+
+  /**
+   * Here vol is between volumeDisplayMin (-100 or 0) and 
+   * volumeDisplayMax (100).
+   * How the volume slider, display and buttons work:
+   * The buttons use the global function setVolume() to set the 
+   * displayed value = the currentVolume to
+   * specified value.  Although they are the same, currentVolume
+   * and the displayed volume are the "same", the displayed
+   * volume is a string containing blanks.
+   */
+  setDisplay(vol) {
+    this.currentVolume = vol;
+    this.volumeSpan.html(vol);
+  }  // setDisplay
+
+  /**
+   * The slider is set proprotionally to the displayed value
+   * but on a different scale.
+   */
+  setSlider(vol) {
+    let v = map(vol, volumeDisplayMin, volumeDisplayMax,
+                        0, volumeSliderMax);
+    this.volSlide.value(v);
+  }  // setSlider
+
+} // end class
+
+/* Global functions
+*/
+/**
+ * When the slider is moved, this function is called and the volumes
+ * are adjusted.   See invertChanged comments for explanation
+ * about volumeSliderMin.  The slider actually goes from 0 to 
+ * volumeSliderMax.
+ */
+function respondToVolSliderMoved() {
+  let val = volume.volSlide.value();
+  v = map(val, 0, volumeSliderMax, volumeDisplayMin, volumeDisplayMax);
+  setVolume(v);
+}  // end respondToVolSliderMoved
+
+/**
+ * Sets currentVolume and displayed volume to v and masterMixer to
+ * 100 of that value.  The slider is mapped proportionally 
+ */
+function setVolume(v) {   // sets master volume control
+     // see invertChanged comments
+  if (playing) {
+    mixerGain.amp(v/100., 0.5);
+  }
+  volume.setDisplay(round(10 *v) / 10);
+  vPos = map(v, volumeDisplayMin, volumeDisplayMax,
+            0, volumeSliderMax);
+  volume.volSlide.value(vPos);
+}  // end setVolume
+
+/**
+ * Returns the current volume/100 so it can be used in other
+ * parts of the program.
+ */
+function getVolume() {
+  return volume.currentVolume/100;
+} // end getVolume
+
+/**
+ * When inversion is checked, sliders are set from -100 to 100, when
+ * not checked, they are set from 0 to 100.  This is done by changing
+ * volumeSliderMin.  (Unfortunately there does not seem to be a way
+ * to change the actual min and max of a slider, so it is being done with
+ * a mapping onto a slider set from 0 to 1000.)
+ */
+function invertChanged() {
+  let vSaved = abs(volume.currentVolume);  // use abs in case getVolume is negative
+  if (volume.invertChk.checked()) {
+     volumeDisplayMin = -volumeDisplayMax;
+  } else {
+     volumeDisplayMin = 0;
+  }
+  setVolume(vSaved);
+  harmonicInvertChanged();
+}  // invertChanged

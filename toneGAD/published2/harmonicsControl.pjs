@@ -1,0 +1,131 @@
+/**
+ * This control allows the user to set the levels of several
+ * harmonics.
+ *
+ * James Brink      2/26/2020
+ */
+let harmonic; 
+let harmonicOnOffChecks = [];  // turn harmonic on/off
+let harmonicOnOffSpans = [];  // displays harmonic on/off
+let harmonicFreqSpans  = [];  // displays frequency of harmonic
+let harmonicVolSlides = [];   // controls volume of harmonic
+let harmonicVolSpans = [];  // display volume of harmonic
+let harmonicPlusMinusChecks = [];  // used to allow harmonic subtraction
+
+let envelope = [];
+
+let onString = "&nbsp;On &nbsp;";
+let offString = "Off &nbsp;"
+class HarmonicControl {
+  /**
+   * constructor where the colors are HTML/CSS color names
+   */
+  constructor(itsWidth, itsHeight, itsParent) {
+    this.controlWidth = itsWidth;
+    this.controlHeight = itsHeight;
+    this.controlParent = itsParent;
+    
+    this.harmonicDiv;
+  }  // end constructor
+   
+   setupHarmonicControl() {
+      let harmonDivs = [];
+      this.harmonicDiv = createFaceplateDiv('HARMONICS',
+                this.controlWidth, this.controlHeight, this.controlParent);
+      this.harmonicDiv.style("text-size: smaller; height: 180px; display:none;");
+      for (let i = 0; i < numOsc; i++) {
+          harmonDivs[i] = createDiv();
+          harmonDivs[i].parent(this.harmonicDiv);
+          harmonDivs[i].style("height:18px");
+          let titleSpan = createSpan("Harmonic " + (i+1) + " &nbsp; ");  //label
+          titleSpan.parent(harmonDivs[i]);
+          harmonicOnOffChecks[i] = createCheckbox("", false);   // on/off checkbox
+          harmonicOnOffChecks[i].parent(harmonDivs[i]);
+          harmonicOnOffChecks[i].style("display: inline-block;");
+          harmonicOnOffChecks[i].changed(function() {onOffChanged(i);});
+          harmonicOnOffSpans[i] = createSpan(offString);    // on/off label
+          harmonicOnOffSpans[i].parent(harmonDivs[i]);
+          harmonicFreqSpans[i] = createSpan("&nbsp;"
+                    + (round(100 * osc[i].getFreq()) / 100) + " Hz &nbsp;");   // Hz display
+          harmonicFreqSpans[i].parent(harmonDivs[i]);
+          harmonicFreqSpans[i].style("color: red; background-color: white");
+          let spacer1Span = createSpan(" &nbsp; ");        // spacer
+          spacer1Span.parent(harmonDivs[i]);
+          harmonicVolSlides[i] = createSlider(0, 100,100 * 1/(i+1));   // slider
+          harmonicVolSlides[i].parent(harmonDivs[i]);
+          harmonicVolSlides[i].input(function () {harmonicVolSlideChanging(i)});
+          let spacer3Span = createSpan(" &nbsp; ");     // spacer
+          spacer3Span.parent(harmonDivs[i]);
+          harmonicVolSpans[i] = createSpan("&nbsp; "
+                         + harmonicVolSlides[i].value() + " &nbsp;");     // vol display
+          harmonicVolSpans[i].parent(harmonDivs[i]); 
+          harmonicVolSpans[i].style("color: green; background-color:white");
+      }
+      harmonicOnOffChecks[0].checked(true);
+      harmonicOnOffSpans[0].html(onString);
+      // set values
+     for (let i = 0; i < numOsc; i++) {
+       envelope[i] = new p5.Envelope();
+      }
+    // however setADSR and setRange will be set each time a note is played
+  }  // createEnvolope 
+
+}  // end setupHarmonicControl
+    
+function  setOnOff(vol0)  {
+    for (let i = 0; i < numOsc; i++ )  {
+       if (vol0 == 0) {  // off mode
+          harmonicOnOffChecks[0].checked(false);   // but osc[0] is off
+          harmonicOnOffSpans[0].html("&nbsp;Off &nbsp;");
+       }  else { // tone and harmonic mode
+          harmonicOnOffChecks[0].checked (true);
+          harmonicOnOffSpans[0].html("&nbsp;On &nbsp;&nbsp;");
+       }
+  }  // end setOnOff  
+}  // class harmonicControl
+            
+/**
+ * This functions called every time the slide is changed OR when the
+ * correspondin plus/minuscheckbox changed */
+function harmonicVolSlideChanging(i) {
+  harmonicVolSpans[i].html("&nbsp; " + harmonicVolSlides[i].value() + " &nbsp;");
+}  // end harmonicVolSlideChanged
+
+function onOffChanged(i) {
+  if ( harmonicOnOffChecks[i].checked()) {
+    harmonicOnOffSpans[i].html("&nbsp;On &nbsp;&nbsp;");
+    if (modeCtrl.mode == "piano") {
+       envelope[i].triggerAttack();
+    } else if (modeCtrl.mode != "off"){
+       osc[i].amp(harmonicVolSlides[i].value()/100);
+    }
+  } else {
+    harmonicOnOffSpans[i].html("&nbsp;Off &nbsp;");
+    if (modeCtrl.mode == "piano") {
+       envelope[i].triggerRelease();
+    } else {
+       osc[i].amp(0, .3);
+    }
+  }
+}  // end onOffChanged
+
+function turnSoundOn() {
+  for (let i = 0; i < numOsc; i++) {
+     if (harmonicOnOffChecks[i].checked()) {
+        if (modeCtrl.mode == "piano") {
+        // sounds will not be turned until a key is pressed and processed in
+        // keyboard control  
+         } else  if (modeCtrl.mode != "off") {
+               osc[i].amp(harmonicVolSlides[i].value()/100);
+         }
+     } else {
+        osc[i].amp(0, .1);
+     }
+  }
+}  //turn soundOn
+
+function turnSoundOff() {
+  for (let  i = 0; i < numOsc; i++) {
+     osc[i].amp(0, .3);
+  }
+} // turnSoundOff

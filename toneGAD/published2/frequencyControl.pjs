@@ -1,0 +1,175 @@
+/* This class is self-contained
+ * except it requires the global function:
+ * setFrequency(f) - changes the slider position, the osc freq and the  
+ *                   display
+ * It is called when the buttons are clicked.
+ * 
+ * It includes two global functions at the end of this file.
+ * 
+ * JB   2/21/2020
+ */
+ 
+ let frequency;     // fequency shown in display
+class FrequencyControl {
+  /**
+   * constructor where the colors are HTML/CSS color names
+   */
+  constructor(itsWidth, itsHeight, itsParent) {
+    this.controlWidth = itsWidth;
+    this.controlHeight = itsHeight;
+    this.controlParent = itsParent;
+    
+    this.frequencySpan;  // displays frequency
+    this.freqSlide;
+    
+    this.frequencyOptions = ['100 Hz', 'Middle C', 'A', 'B flat'];
+    this.frequency = [100, 261.3256, 440, 466.1638];
+    this.multiplierOptions = ['1/4', '1/2', '1', '2', '3', '4', '5', '6',
+                       '7', '8', '9', '10'];
+    this.multiplierVals = [.25, .5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    
+    this.multiplier  = 1;
+    this.numMultButtons = this.multiplierOptions.length;
+    this.multiplierButtons = [];
+    this.baseFrequency;
+    
+    this.slideWidthStyle = "width: " + (.85 *  this.controlWidth) + "px";
+    this.buttonWidthStyle = "width: " + (.45 * this.controlWidth) + "px";
+    this.multiplierButtonsWidthStyle = "width: 30px; textf-align: center; ";
+    this.multiplierButtonsStyle =  this.multiplierButtonsWidthStyle
+              + "color: #0000FF; ";
+    this.multiplierButtonsSelectedStyle = this.multiplierButtonsWidthStyle
+              + "color: #FF0000; ";
+    
+  }  // end constructor
+
+  /**
+   * Creates a div for the displaying the wave form and
+   * sets up the buttons in the that div
+   */
+  setupFrequencyControl() {
+    let frequencyDiv = createFaceplateDiv('FREQUENCY',
+          this.controlWidth, this.controlHeight, this.controlParent);
+    let frequencyDiv1 = createDiv(); 
+    this.frequencySpan = createDisplaySpan(frequencyDiv);
+    
+    let frequencyDiv2 = createDiv();
+    frequencyDiv2.parent(frequencyDiv);
+    let frequencyButtons = [];
+    for (let i = 0; i < this.frequencyOptions.length; i++) {
+      let f = this.frequencyOptions[i];// for some reason, waveOptions doesn't work in function call
+      let fVal = this.frequency[i];
+      frequencyButtons[i] = createButton(f);  
+      frequencyButtons[i].mousePressed(function() {buttonFrequency(fVal);});
+      frequencyButtons[i].style(this.buttonWidthStyle);
+      frequencyButtons[i].parent(frequencyDiv2);
+    }
+    this.freqSlide = createSlider(50, 2200, 440);
+    this.freqSlide.style(this.slideWidthStyle);
+    this.freqSlide.parent(frequencyDiv);
+    
+    let title = createDiv("Multipliers");
+    title.parent(frequencyDiv); 
+    let frequencyDiv3 = createDiv();
+    frequencyDiv3.parent(frequencyDiv);
+    for (let i = 0; i < this.numMultButtons; i++) {
+      let m = this.multiplierOptions[i];
+      this.multiplierButtons[i] = createButton(m);
+      this.multiplierButtons[i].mousePressed(function() 
+                                       {setMultipierButton(i);});
+      this.multiplierButtons[i].style(this.multiplierButtonsStyle);
+      this.multiplierButtons[i].parent(frequencyDiv3);
+    }
+    
+    let para = createP(" ");
+    para.parent(frequencyDiv); 
+    
+    this.setFrequency(200); 
+    this.setSlider(200);
+    this.selectMultiplierButton(2);
+     } //  end setupFrequencyControl
+  
+  selectMultiplierButton(b) {
+    let mbs  = this.multiplierButtonsStyle;
+    let mbss = this.multiplierButtonsSelectedStyle;
+    for (let i = 0; i < this.numMultButtons; i++) {
+      this.multiplierButtons[i].style(mbs);
+    }
+    let selectedMb = this.multiplierButtons[b];
+    selectedMb.style(mbss);
+    this.multiplier = this.multiplierVals[b];
+    this.setFrequency(this.baseFrequency);
+  }  // selectMultiplierButton
+  
+  
+  /* How the slider, display and buttons work:
+   * The buttons use the global function setFrequency() to set the osc freq,
+   * the slide value, and the displayed value = the baseFrequency to
+   * specified value.
+   *
+   * However, the slider only allows integer values, so the slider value may
+   * actually be slightly different than the baseFrequency.  The global
+   * function respondToFreqSliderMoved() checks the difference the between
+   * the baseFrequency and the slider value.  If it is large, then
+   * it assumes the slider has been moved and the frequency is reset
+   * to the slider value.
+   */
+  setFrequency(freq) {
+    this.baseFrequency = freq;
+    let workingFreq = this.multiplier * freq;
+    for (let i = 0; i < numOsc; i++) {
+       let f = (i + 1) * workingFreq;
+       osc[i].freq(f);
+       if (harmonicFreqSpans[i] != null)  {
+           let roundFreq = round(10000 * f)/10000;
+           harmonicFreqSpans[i].html('&nbsp; ' +roundFreq  + ' Hz &nbsp;');
+       }
+     }
+    let roundFreq = round(10000 * workingFreq)/10000;
+    this.frequencySpan.html('&nbsp; ' + roundFreq  + ' Hz &nbsp;');
+    frequency = roundFreq;
+  }  // setDisplay
+   
+  setSlider(freq) {
+    this.freqSlide.value(freq);
+  }  // setSlider  
+  
+  /**
+ * Note: freq.freqSlide.value only takes on integer values so
+ * currentFreuency = displayed value may be a little diffent
+ * the slider value.
+ * If the difference is "large", then it is assumed that the
+ * slider has been moved and the frequency is reset to the 
+ * slider value.
+ */
+  respondToFreqSliderMoved() {
+  let f = this.freqSlide.value(); 
+  if (abs(this.baseFrequency - f) > 2) {
+    this.setFrequency(f);
+  }
+}  // end respondToFreqSlider
+
+}  // end class FrequencyControl
+
+// Global functions
+
+
+
+/**
+ * Responds to clicking a frequency button.
+ * Sets the slider, then uses "setFrequency"
+ * actually set the frequency.
+ */
+function buttonFrequency(f) {
+  freq.setSlider(f);
+  freq.setFrequency(f);
+}  // end setFreqSlider
+
+function setMultipierButton(b) {
+  freq.selectMultiplierButton(b);
+}  // end setMemoryButton
+
+
+
+
+

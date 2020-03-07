@@ -1,0 +1,64 @@
+/* Declares the MyWave class.
+ * This class is self-contained except it requires the global function:
+ *   setWaveType(option)
+ *   where option is 'sine', 'triangle', 'sawtooth',or 'square'
+ *
+ * Includes the required golbal function at the end of this file. 
+ * JB   2/17/2020
+ */
+class WaveControl {
+  /**
+   * constructor where the colors are HTML/CSS color names
+   * e.g.  "red", "black", "blue", or in "#rrggbb" form. (in quotes)
+   * See http://www.brinkje.com/web/ColorMixer/ColorMixer.html
+   */
+  constructor(itsWidth, itsHeight, itsParent) { 
+    this.controlWidth = itsWidth;
+    this.controlHeight = itsHeight;
+    this.controlParent = itsParent;
+    this.waveSpan;
+    this.waveOptions = ['sine', 'triangle', 'sawtooth', 'square'];
+    this.buttonStyle = "width: " + (.8 * this.controlWidth) + "px"
+         + "; text-align: center";
+  }  // end constructor
+
+  /**
+   * Creates a div for the displaying the wave form and
+   * sets up the buttons in the that div
+   */
+  setupWaveControl() {
+    let waveDiv =createFaceplateDiv('WAVE<br>&nbsp;', this.controlWidth, 
+          this.controlHeight, this.ControlParent);
+    this.waveSpan = createDisplaySpan(waveDiv);
+    
+    let waveDiv2 = createDiv();
+    waveDiv2.parent(waveDiv);
+    let waveButtons = [];
+    for (let i = 0; i < this.waveOptions.length; i++) {
+      let w = this.waveOptions[i];// for some reason, waveOptions doesn't work in function call
+      waveButtons[i] = createButton(w);  
+      waveButtons[i].mousePressed(function() { setWaveType(w);});
+      waveButtons[i].style(this.buttonStyle);
+      waveButtons[i].parent(waveDiv2);
+    }
+    setWaveType("sine");
+    let waveDiv3 = createDiv("&nbsp;");
+    waveDiv3.parent(waveDiv);
+   } //  end setupWaveControl
+  
+  setDisplay(option) {
+    this.waveSpan.html('&nbsp; ' + option + ' &nbsp;');
+  }  // setDisplay
+}  // end class Wave
+
+// Global function
+
+/**
+ * Parameter  w must be "sine", "triangle", "square", or "waw".
+ * It is called by the buttons which do not seem to allow a class
+ * function.
+ */
+function setWaveType(w) {
+  osc.setType(w);
+  wave.setDisplay(w);
+} // setWaveType

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<!-- Revised 2/18/2020 -->
+<html>
+<head>
+  <title>ToneGAD/Mic</title>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <meta name="ROBOTS" content="INDEX, FOLLOW">
+  <style>
+    body {background-color: #EEEEEE; width: 810px}
+    h1 {color: #0000FF; text-align:center}
+    h2 {color: #0044FF; text-align:center}
+    h3 {color: #0088FF;text-align:center}
+    h4 {color: #00CCFF}
+    .aDiv {background-color: #DDDDDD; height:250px; overflow: auto}
+   .floatRight {float: right}
+  </style>
+
+  <script src="http://www.brinkje.com/p5js/p5.min.js"></script>
+  <script src="http://www.brinkje.com/p5js/p5.sound.js"></script> 
+  <script src="toneGADMic.pjs"></script>
+  <script src="waveControl.pjs"></script>
+  <script src="frequencyControl.pjs"></script>
+  <script src="volumeControl.pjs"></script>
+  <script src="fftWaveFormControl.pjs"></script>
+  <script src="onOffControl.pjs"></script>
+  <script src="keyboardControl.pjs"></script>
+</head>
+<body>
+<h1>ToneGAD<br>
+      <span style="font-size:smaller">Tone Generator and Display</span></h1>
+<p>I it is my hope that this sketch might be helpful to someone to better understand
+  wave form physics and music.  Hopefully, it might encourage someone to investigate the
+  concepts more carefully.</p>
+<h2>A guided tour</h2>
+<p> <button id= "tourButton" onclick='toggle(0)'>+/-</button>
+  This section will acquaint you with the various controls.</p>
+<!-- *************************** the tour ********************* -->
+<div id = "tour" style = "display: none" class = "aDiv">
+<h3>The Controls</h3>
+<h4>Mode</h4>
+<p>In the "Mode" panel there are three options:  "Off", "Tone" and "Piano".  The program
+  starts with the "Off" mode and nothing happens until you select either the "Tone" or
+  "Piano" mode.</p>
+<p>In the "Tone" mode, a tone will start to immediately
+  (assuming your speakers are on).   The tone can be controlled by
+  the other controls.  To turn the tone off, switch to either the "Off" or "Piano" mode.
+  In the "Piano" mode you will need to press certain keys in order to get a tone to play.</p>
+
+<h4>Volume</h4>
+<p>Things are more interesting, if you click the "Tone" box.  You can vary the volume with
+  the "Volume"
+  control either using the buttons whose notations are those used in music or with the slider.
+  "pp" means very soft while "ff" means very load.
+  The volume can range from 0 to 100.</p>
+<p>The amount of tone you hear at various frequencies will depend on the quality of your
+  sound generation system and speakers.  With my not very HiFi earphones, I can't hear
+  frequencies below about 35 Hz and above about 7000 Hz.  Quality systems might do much
+  better.  Good ears might hear frequencies up to about 20,000 Hz if the sound system will
+  produce them.</p>
+<h4>Frequency</h4
+<p> Next move to the "Frequency" control which provides
+  3 different ways to select the frequency or pitch. The higher the frequency, the higher pitch
+  the sound seems to us. The top 4 buttons:
+  <ul>
+    <li>"100 Hz".  Hz stands for "Hertz" or "cycles per second".   The higher hertz, the higher
+      pitch of the tone.  100 Hz was selected just because it is a convenient number.</li>
+    <li>"Middle C".  This the pitch is Middle C on the piano.  It frequency shows in the
+      display.</li>
+    <li>"A":  Over the years, several different frequencies have been used for the key of
+      A above middle C.  In 1926, the American music industry agreed to use 440 Hz for
+      A.  It was adapted an international standard in 1955 although not every one agrees.
+     Orchestras is the U.S. and U.K. normally tune their instruments to A pitched at 440 Hz.</li>
+   <li>"B flat":  Most concert, marching, and brass bands tune on "B flat" which just a little
+     higher than "A".  The reason:  many band instruments are pitched in B flat.</li>
+  </ul>
+  <p>Just below the those buttons is a slider that allows adjusting the frequency anywhere
+     between 50Hz and 2200Hz.</p>
+  <p>Below them are 10 multiplier buttons which multiply the selected frequency by the
+     indicated number. <i> (While initially exploring these buttons, it strongly suggested that you select
+    "100 Hz" button.)</i> The default is "1". "2" multiplies the selected frequency by 2, "3" multiplies
+    it by 3 and so on. The selected button is shown in "red".  In music, doubling the frequency
+    increases the tone by 1 octave, reducing the tone by 1/2, lowers by 1 octave.  This makes
+    the multipliers 1/4, 1/2, 2, 4, and 8 especially interesting as they can reduce the
+    pitch by 2 octaves or 1 octave  or increase it by 1, 2 or 3 octaves.</p>
+<h4>FFT and the two displays</h4>
+ <p>In case you are wondering, "FFT" stands for "Fast Fourier Transform", a
+     mathematical way of analyzing periodic (regularly repeating) functions.  But don't
+     worry.  You not need to
+     do any math.  But fortunately we can take advantage of its results.  (I was able
+     to advantage of somebody else's coding and didn't have to do the code the
+     mathematics!)
+ <p>The upper display shows an image of the wave.  If the display seems to be too bouncy
+    to understand, try clicking on of the "... times/sec" buttons.  Then the upper display will
+    show a snap shot of the  wave which is updated the indicated number of times each
+    second.  Assuming that the wave form is still a sine wave, you should see a nice image
+    of the common sine wave if the frequency is somewhere between 100 Hz and 2000 Hz.
+    Below that, you may see only part of one cycle, above that you may see a smear.</p>
+   <p>You will the notice the width of a set of humps in the curve gets smaller as the
+    frequency increases.</p>
+  <p>If you are still displaying a sine wave, you will see a spike at the specified frequency
+    in the lower display.
+    (We will discuss this display again when we look at other wave forms.  It will be much
+    more interesting then and the "Show peaks" check box may be useful at that point.)</p>
+<h4>Wave Control</h4>
+ <p>You are probably tried of listening to the sine wave.  So lets try some of the other
+    options.  Looking at the wave forms in the upper display, you can easily understand
+    the names for the triangle, saw tooth and square wave.  The later is the easiest to
+    understand.  A square wave could be produced by just turning on and off an
+    electrical circuit in a periodic fashion.  I am not sure how this program produces
+    the wave because again I am taking advantage someone else's coding.  One could assume
+    that the triangle and square wave could be produced by turning a voltage control
+    up and down periodically but again I can't say how this program does it.</p>
+  <p>The lower display becomes quite interesting with these wave forms.  <b>
+    It will be easiest understand them if you set the frequency to 100 Hz and the
+    multiplier to 10 giving a 1000 Hz  tone and turn on the "Show peaks" option  in the
+    FFT display.</b>   If you look at the triangle or square wave forms, you will see
+    peaks at  1000 Hz, 3000 Hz, 5000 Hz .... .  One the other hand, if you look at the
+    sawtooth wave, you will see peaks at 1000 Hz, 2000 Hz, 3000 Hz, ... .  What gives?
+  <p>
+  <p>Comment:  Don't be disturbed that the frequencies in the "Show peak" display
+    in the upper right corner of the lower display are not exactly those numbers.  The
+    reason is that the analysis divides all the frequencies up to about 25,000 Hz into
+    1024 "bins".  Each "bin" is about 24 Hz wide and the number report in the peak
+    display is more or less an average for those frequencies.  So if the peak is reported
+    by 1006 Hz, it means that the analysis saw a lot of frequencies near 1006  which
+    would certainly include the 1000 Hz we expected see.  At high frequencies,
+    having 24 Hz wide bins is not a major problem but it is when the frequencies
+    are lower and the reported peaks will not be very accurate.</p>
+  <p>Consider the saw tooth wave.  FFT reports that it would be possible to generate
+    a saw tooth wave mixing waves the frequencies 1000 Hz, 2000 Hz, 3000 Hz, ...,
+    with the proper amplitudes together.  Notice these frequencies are all multiples
+    of the base frequency 1000 Hz.  The height of the peak gives you some idea of the
+    amplitude needed although some may actually be positive and some negative.  On
+    the other hand, the triangle and square waves only use the odd (1,3. 5, 7, ...)
+    multiples of 1000 Hz.  The even  (2,4, 6, 8, ...)multiples are not needed because of certain
+    symmetry in the wave form.</p>
+  <p>The peak frequencies that you see with these wave forms are sometimes called
+    <b>harmonics</b> or <b>overtones</b>.  In the harmonics section we will discus
+    why the musical notes we hear are effected by the harmonic the wave form
+    generates even though nice musical tones rarely have the extreme shape of the
+    three none-sine wave options.</p>
+
+<h3>The Piano mode</h3>
+<p>The piano mode allow you to individual play individual notes using keyboard keys
+  To see the keys that work, just click the "Keys for Piano Note" button.  You will see
+  there are two ways.  You can use the note names like "a", "b", ..., in lower case while
+  capping a letter to gets you it sharp (for those keys that have sharps).  In some cases,
+  it is more convenient to use the top row of keys on a standard keyboard which include
+  the number keys.  The notes sound as long as you hold the key down.  Their
+  (approximate) frequency shows in the Frequency control and the multipliers work
+  in the normal fashion.  The Volume and Wave Form controls work as normal.</p>
+<p>In attempt to mimic many instruments, notes are accented at lower volume levels
+  when the notes starts and they decay slowly when the key is released.</p>
+<button id= "enhanceButton" onclick='toggle(0)'>Close this section</button>
+</div>
+<!-- *************************** end the tour ********************* -->
+<h2>  How can harmonics be used to produce different pitches?</h2>
+
+<p><button id = "brassButton" onclick='toggle(1)'>+/-</button>
+    In this section, we will look at how brass instrument players take advantage of
+   harmonics.  They can even be observed on some string instruments like a guitar.
+</p>
+
+<!-- *************************** the brass section ********************* -->
+<div id = "brass" style = "display: none" class = "aDiv">
+
+<p>Pianos, organs and woodwind instruments have lots of keys that allow the musician
+   to play lots of different notes.  String instruments may have only 4 or  6 strings, but
+   the player can press the string at various points to pick the desired frequency.
+   But have you ever noticed that most brass instruments
+   like trumpets and tubas typically only have three valves?  They can be used in
+   combination but for practical purposes, there are are only 7 different combinations.
+   How in the world can brass players produce lots of different notes? Typically, the
+   length of the tubing determines the frequency of sound and the purpose of the
+   valves is to change the length of the tubing.  The valves allow for 7 different
+   tube lengths.  (Trombone players effectly only have the same 7
+   options but they are able to adjust the slide in between those options.) How in the
+   world can brass players produce lots of different notes? </p>
+<!-- <p>Before answering the question, lets look at another situation.  Have you ever filled
+   a bottle part full with water and then blown across the top
+   of the bottle to get a tone?  If you have, you may have
+   notice that you will get a particular sound frequency.  Want to change the frequency?
+   You wil have to increase the amount of water to increase the frequency, decrease it to
+   decrease the frequency.  The frequency depends on the air space in bottle.  Likewise
+   a pipe organ or marimba have to have a lot of different length pipes to produce
+   differnt sounds.</p> -->
+<p>The answer is they use their
+   lips to produce different harmonics.  It is something like selecting one of the
+   multiplier buttons in the Frequency control.   Most players use there lips to produce
+   harmonics (or multipiers) of  2, 3, ..., 6.  An excellent player (depending on the
+   instrument) can pick harmonics from 1 to 8 or possibly even higher.  Harmonic 1,
+   called the fundamental or petal tone, is often hard to produce.  Harmonics higher
+   than 6  take lots of practice to control in a useful manner.</p>
+<p>Lets  take a closer look at the trombone,  in part because I try to play one.  (The
+  other part is the trumpet players actually play B flat when they call the note being played C
+  which may be confusing.)
+  Recall
+   that we said the concert bands typically tune on B flat because most band
+   instruments are pitched in B
+   flat.  Trombones are pitched in in that key.  If the trombone players leave the slide
+   all the way closed, they can play
+   harmonics based on B flat.  (Trumpets can get the same effect if they leave all
+   their valves up only they are an octive higher because their tubing is only half as long.
+   But for reasons that muscians can only understand, they call it C.)  Lets
+   look carefully at the harmonics of a trombone with the slide closed.
+<ul>
+  <li>1st harmonic, multiplier 1:  a low B flat two measures below Middle C on the
+     piano but remember it normally very hard to play.  It is sometimes called the
+     fundamental or petal note.</li>
+   <li>2nd harmonic, multiplier 2:  Remember that multipier 2 produces a tone one octive
+     higher, so it is also B flat, one otave below middle C.</li>
+   <li>3rd harmonic, multipier 3:  F below middle C</li>
+   <li>4th harmonic, multiplier 4:  As we know, this is 1 octave above the 2nd harmonic so
+       it is the B flat just below middle C.</li>
+   <li>5th harmonic, multiplier 5:  D just above middle C.</li>
+   <li>6th harmonic, multiplier 6:  6 is twice 3, so this another F, this time above middle C.</li>
+   <li>7th harmonic, multiplier 7:  A rather flat A flat so it is not normally used on a
+     trombone and almost never on other brass instruments with valves.</li>
+    <li>8th harmonic, multiplier 8:  8 is twice 4.  So can you guess that it is also a B flat,
+    an octave above middle C.  Typically only expert players can produce this harmonic
+    well enough to play it a concert.</li>
+</ul>
+<p>Exactly the same concepts apply to baratones and
+   euphoniams. while a Double B flat tubas plays one octave lower. Trumpet players play
+    the same notes but because their tubing is only half as long,
+   the notes are an octave higher.  (Remember that for musical reasons understood by
+   trumptet players, the would call the harmonics C, C, G, C, E, G, a flat B flat that would
+   almost never be used, and C.  The french horn,
+   alto horn (also called tenor horn, E flat horn, or althorn), and the E flat tuba are pitched
+   differently and have different fundamentals but the harmonics work the same
+   way.</p>
+<div class = "floatRight"><img src = "Images/VibratingString.png" alt="Vibrating strings"></div>
+<p>We have discussed these harmonics on brass instruments, but they also apply
+   to stringed instruments like a guitar.  Have you ever looked closely at thicker,
+   heavier lower note string vibrate?  If you have, you will notice that it vibrates with
+   the shape similar to the top half of a sine wave.  To play a note one octave higher,
+   guitar players press string at the half way point and only half the string vibrates.
+   But if the one very gently touches the string at the half point, the first harmonic is
+   suppressed and one may see
+   both halves of the string vibrate - the string is now vibrating in two sections - the second
+   harmonic.  In theory, we could try gently touching string 1/3 of the way down.  This
+   would mean neither the first or 2 second harmonic could sound and the string would
+   be vibrating in 3 sections producing the 3 harmonic.</p>
+<p>You may wonder how the harmonics work in brass instruments.  The following is
+   a very simple minded explaination.  Playing harmonic 1 means
+   that one peri od of the sine wave uses the entire length of the pipe.  When  brass
+   players users use their lips to play the 2nd harmonic, they are effectively getting the
+   instrument to vibrate in two sections in much the same manner as we were able
+   to produce the second harmonic on the guitar.  If they play the 3rd harmonic, they
+   are getting
+   instrument to vibrate in three sections and so on.  Fortunately, their harmonics can be
+   played usefully and loadly on brass instruments although they would be quite soft
+   on the guitar.</p>
+<button id= "enhanceButton" onclick='toggle(1)'>Close this section</button>
+</div>
+<!-- *************************** end the brass section ********************* -->
+
+<h2>How can harmonics help music enhance music?</h2>
+
+<!-- ********************* harmonics enhance section ***************** -->
+<p> <button id= "enhanceButton" onclick='toggle(2)'>+/-</button>
+  Harmonics which are often call overtones in this contex, are important in making
+  music enjoyable to listen to.
+</p>
+<div id = "enhance" style = "display: none" class = "aDiv">
+
+<p>In the previous section we looked at how harmonics can be used to produce
+  different pitches especially in brass instruments.  In this section we will look at how
+  harmonics, normally referred to as <b>overtones</b> in this context enhance almost
+  all music.  Harmonics (or overtones) help explain why a trumpet sounds different
+  than a violin or flute even they are holding on the same note.</p>
+<p>Did you find that sine wave sound boring?  They are just too pure.  If you played
+  much in the piano mode on this program, you might have found yourself preferring
+  to use one of the other wave forms even though they are not really nice sounding.
+  Even the human voice is enriched by harmonics.</p>
+<p>In the previous section, we spent a little time discussing how harmonics could be
+  produced on a guitar.  Actually, even when a player is playing a certain note, there
+  will be small amounts of higher harmonics occurring at the same time.  Even though
+  we may think we are only hearing the first harmonic or fundamental, it is the harmonics
+  that help the note to sound pleasing to us instead of being a boring sine wave.</p>
+<div class = "floatRight"><img src = "Images/trumpetVariations.png"
+            alt="Cornet, trumpet, flugalhorn"></div>
+<h4>Trumpets, cornets, and flugalhorns</h4>
+<p>As the first example, we are going to look at trumpets, cornets, and flugalhorns.
+  If you are not familiar with these instruments, you might want to look at the video
+  <a href="https://www.youtube.com/watch?v=ZhfGM19bsmM">
+   https://www.youtube.com/watch?v=ZhfGM19bsmM</a> where the presenter
+   compares these instruments and there sound.
+  The typical versions of these instruments are all pitched in B flat and have the
+  same valving.  Plays can move from one of the instruments to the other without
+  much difficulty although a player may specialize in just one of them.  One the other
+  hand, perhaps you may have seen trumpet players switch to the flugalhorn in the
+  middle of the piece.  Why would they do that?  The answer is they have a different
+  sound.  But why do they sound different even when they play the same note?  The
+  answer is they produce different harmonic or overtones.  The tubes in a trumpet are
+  straighter and have a smaller diameter.  That means that the higher harmonics, though
+  small, are more pronounced giving the trumpet a more piecing tone.  On the other had, the
+  rounder, somewhat larger diameter tubes in the flugalhorn give it a mellower tone with
+  less of the higher harmonics.
+  The cornet might be considered an compromise between those two extremes.
+<div class = "floatRight"><img src="Images/PipeOrganPipes.png"
+    alt = "Pipe ranks in a pipe organ"></div>
+<h4>Pipe organs</h4>
+<p>As seen in the picture at the right, larger pipe organs often have several different
+  kinds of pipes. There are multiple pipes of each style as they needed produce different
+  pitches.  This organ has both square and trianglar shaped wood pipes as well
+  metal pipes of different shapes.  Why? The different materials and shapes produce
+  sound with differing amounts of harmonics or overtones.  As a result, the sound
+  coming from the different style of pipes has a different tonal quality even when
+  they are playing the same note.</p>
+<button id= "enhanceButton" onclick='toggle(2)'>Close this section</button>
+</div>
+<!-- ********************* end  harmonics enhance section ***************** -->
+<h2>Some formalities</h2>
+<p> <button id= "formalitiesButton" onclick='toggle(3)'>+/-</button>
+
+The version, source files and author.</p>
+
+<div id = "formalities" style = "display: none" class = "aDiv"></p>
+<!-- ********************* formalities section ***************** -->
+<p>Version 1.0.1, 2/18/2020.  This is a draft version and improvements are expected.  This introduced
+   fixed sized window with scroll bars for sections when displayed.<p>
+<p>The source files:
+<br><a href = "toneGAD.pjs">toneGad.pjs</a>  The main program.
+<br><a href = "keyboardControl.pjs">keyboardConrol.pjs</a>  Code for
+         mode control and keyboard keys.
+<br><a href = "waveControl.pjs">Controller for the wave selection.
+<br><a href = "volumeControl.pjs">Controller for volume.
+<br><a href = "frequencyControl.pjs">Code for frequency selection.
+<br><a href = "FFTWAveFormControl.pjs">Controller for the FFT section
+    and the two displays.</a>
+<br>The image files:
+<br><a href = "Images/PipeOrganPipes.png">Images/PipeOrganPipes.png</a>
+<br><a href = "Images/trumpetVariations.png">Images/trumpetVariations.png</a>
+<br><a href = "Images/VibratingString.png">Images/VibratingString.png</a>
+</p>
+<p>Comments, suggestions, corrections: 
+   <a href="mailto:brinkje@plu.edu">James Brink</a>, &nbsp; &nbsp; &nbsp; 2/17/2020</p>
+ <button id= "formalitiesButton" onclick='toggle(3)'>Close this section</button>
+
+
+</div>
+<!-- ********************* end  formalities section ***************** -->
+
+   <script>
+    var divs = [];
+    var buttons = [];
+    divs[0] = document.getElementById('tour');
+    buttons[0] = document.getElementById('tourButton');
+    divs[1] = document.getElementById("brass");
+    divs[2] = document.getElementById("enhance");
+    divs[3] = document.getElementById("formalities");
+
+    function toggle(n) {
+      if (divs[n].style.display == 'block') {
+         divs[n].style.display = 'none';
+      } else {
+         divs[n].style.display = 'block';
+      }
+   }  // end toggle
+  </script
+</body>
+</html>

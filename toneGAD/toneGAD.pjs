@@ -66,9 +66,6 @@ function draw() {
 
   freq.respondToFreqSliderMoved()
   fftWaveForm.drawFFTWaveFormControl();
-
-  drawMicDisplay();  // display mic info in center of canvas if mic has been on
-
 }  // end draw
 
 /**

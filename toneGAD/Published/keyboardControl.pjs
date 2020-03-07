@@ -1,0 +1,192 @@
+/* This class creates a onOff control in a div.  The response to a 
+ * button click is determined by the global function onOffClicked().
+ * Its on and off text values are specified when constructed.  The 
+ * initial value is the on value.  
+ * 
+ * The button can be accessed using document.getElementById("onOff"). 
+ *
+ * Sample onOffClicked is included.
+ * 
+ * JB   2/14/2020
+ */
+let attackLevel = 1.0;
+let releaseLevel = 0;
+let attackTime = 0.001;
+let decayTime = 0.3;
+let releaseTime = 0.5;
+let envelope;
+
+class KeyboardControl {
+  /**
+   * constructor where the colors are HTML/CSS color names or values
+   */
+  constructor(itsWidth, itsHeight, itsParent)
+  {
+    // save some arguments
+    this.divWidth = itsWidth;
+    this.divHeight = itsHeight;
+    this.divParent = itsParent;
+    // declare modes checkboxes
+    this.offModeCheck;
+    this.toneModeCheck;
+    this.pianoMOdeCheck;
+    this.hintButton;
+    this.mode = "off";
+    
+  } // end constructor
+  /**
+   * Creates a div for the ...
+   */
+  setupControl() {
+    let keyBoardDiv = createFaceplateDiv('MODE<br>&nbsp;', this.divWidth,
+        this.divHeight, this.divParent);
+
+    let checkDiv = createDiv();
+    checkDiv.parent(keyBoardDiv);
+    checkDiv.style("text-align: left");
+    this.offModeCheck = createCheckbox("Off", true);
+    this.offModeCheck.parent(checkDiv);
+    this.offModeCheck.changed(offModeCheck);
+    this.toneModeCheck = createCheckbox("Tone", false);
+    this.toneModeCheck.parent(checkDiv);
+    this.toneModeCheck.changed(toneModeCheck);
+    this.pianoModeCheck = createCheckbox("Piano", false);
+    this.pianoModeCheck.parent(checkDiv);
+    this.pianoModeCheck.changed(pianoModeCheck);
+     
+    let spaceDiv = createDiv("&nbsp;");
+    spaceDiv.parent(keyBoardDiv);
+    
+    this.hintButton = createButton("Keys for Piano Notes");
+    this.hintButton.mousePressed(hintButton);
+    this.hintButton.parent(keyBoardDiv);
+    this.hintButton.style("width: " + (.92 * this.divWidth) + "px");
+    
+    let spaceDiv2 = createDiv("&nbsp;");
+    spaceDiv2.parent(keyBoardDiv);
+    
+    this.createEnvelope();
+
+   }  // end setupControl
+   
+  createEnvelope() {  
+    // set values
+    attackLevel = 1.0;
+    releaseLevel = 0;
+    attackTime = 0.001;
+    decayTime = 0.3;
+    releaseTime = 0.5;
+    envelope = new p5.Env();
+    // however setADSR and setRange will be set each time a note is played
+ //     envelope.setRange(attackLevel, releaseLevel);
+    envelope.setADSR(attackTime, decayTime, .5, releaseTime); 
+    envelope.setRange(attackLevel, releaseLevel);
+  //  return envelope;
+  }  // createEnvolope 
+
+} // class KeyBoardControl
+
+
+function offModeCheck() {
+  keyBoard.mode = "off";
+  keyBoard.offModeCheck.checked(true);  // just in case check when true
+  keyBoard.toneModeCheck.checked(false);
+  keyBoard.pianoModeCheck.checked(false);
+  playing = false;
+  osc.amp(0, .5);
+}  // clickOffMode
+
+function toneModeCheck() {
+  keyBoard.mode = "tone";
+  keyBoard.offModeCheck.checked(false);
+  keyBoard.toneModeCheck.checked(true);
+  keyBoard.pianoModeCheck.checked(false);
+  playing = true;
+  osc.amp(getVolume(), .1);
+}  // clickToneMode
+
+function pianoModeCheck() {
+  keyBoard.mode = "piano";
+  keyBoard.offModeCheck.checked(false);
+  keyBoard.toneModeCheck.checked(false);
+  keyBoard.pianoModeCheck.checked(true);
+  osc.amp(envelope);  
+}  // clickPianoMode
+
+// when a key is typed, interpret key, determine midi, and change frequency
+function keyTyped() {
+  if (keyBoard.mode === "piano") {
+    let f = midiToFreq(interpretCh(key));    // interpretCh returns midi
+    freq.setSlider(f);
+    osc.freq(f);
+    let vol = getVolume();
+    let attackVol = min(2 * vol, 1);
+    playing = true;
+    envelope.setADSR(attackTime, decayTime, vol, releaseTime);
+    envelope.setRange(attackVol, releaseLevel);
+    envelope.triggerAttack();
+  }
+}
+
+// when a key is released, turn of the key and clear the display
+function keyReleased() {
+  if (keyBoard.mode === "piano") {
+    playing = false;
+    envelope.triggerRelease();
+    interpretCh("");
+  }
+  return false;
+}
+
+function hintButton() {
+  let helpText =
+              "Tone Key(s)   Tone Key(s)"
+        + "\n  B           `"
+        + "\n  C      c, 1         C#      C, 2"
+        + "\n  D      d, 3         D#      D, 4" 
+        + "\n  E      e, 3"
+        + "\n  F       f,  5         F#       F, 6" 
+        + "\n  G      g, 7         G#      G, 8" 
+        + "\n  A       a, 9         A#       A, 0" 
+        + "\n  B       b, -" 
+        + "\n  C           =";
+   alert(helpText);
+} // hintButton
+
+function interpretCh(aCh) {
+  let midi;
+  switch(aCh) {
+    case 'c': display = "C"; midi = 60; break;
+    case 'C': display = "C#"; midi = 61; break;
+    case 'd': display = "D"; midi = 62; break;
+    case 'D': display = "D#"; midi = 63; break;
+    case 'e': display = "E"; midi = 64; break;
+    case 'f': display = "F"; midi = 65; break;
+    case 'F': display = "F#"; midi = 66; break;
+    case 'g': display = "G"; midi = 67; break;
+    case 'G': display = "G#"; midi = 68; break;
+    case 'a': display = "A"; midi = 69; break;
+    case 'A': display = "A#"; midi = 70; break;
+    case 'b': display = "B"; midi = 71; break;
+    case '`': display = "Bv"; midi = 59; break;
+    case '1': display = "C#"; midi = 61; break;
+    case '2': display = "D"; midi = 62; break;
+    case '3': display = "D#"; midi = 63; break;
+    case '4': display = "E"; midi = 64; break;
+    case '5': display = "F"; midi = 65; break;
+    case '6': display = "F#"; midi = 66; break;
+    case '7': display = "G"; midi = 67; break;
+    case '8': display = "G#"; midi = 68; break;
+    case '9': display = "A"; midi = 69; break;
+    case '0': display = "A#"; midi = 70; break;
+    case '-': display = "B"; midi = 71; break;
+    case '=': display = "C^"; midi = 72; break;
+      // two special cases to test changing amp
+    case 'z': osc.amp(.8); break;  // tones do not stop
+    case 'Z': osc.amp(envelope); break;  // play notes like piano
+    default:  display = "rest"; midi = 0;
+  }
+  return midi;
+}  // interpretCh
+
+

@@ -1,0 +1,119 @@
+/* This class is self-contained
+ * except it requires the global function:
+ * setVolume(v) - changes the slider position, the osc volume and the  
+ *                   display.
+ *
+ * Includes two global functions that are needed at the end of this file.
+ *  
+ * The volume level is from 0 to 100 so it is divided by 100 before
+ * it is applied to the oscillator which requires 0-1 values
+ * JB   2/21/2020
+ */
+ 
+let volume;
+class VolumeControl{
+  /**
+  * constructor where the colors are HTML/CSS color names
+  */
+  constructor(itsWidth, itsHeight, itsParent) { 
+    this.controlWidth = itsWidth;
+    this.controlHeight = itsHeight;
+    this.controlParent = itsParent;
+    this.volumeSpan;  // displays volume (0 - 1)
+    this.volSlide;
+    this.volumeOptions = ["pp", "p", "mp", "mf", "f", "ff"];
+    this.volumes = [16, 33, 50, 66, 82, 100];
+    this.currentVolume;  // displayed volume 
+    
+    this.buttonWidthStyle = "width: " + (.45 * this.controlWidth) + "px";
+    this.slideWidthStyle = "width: " + (.85 *  this.controlWidth) + "px";
+  } // end constructor
+  
+  /**
+   * Creates a div for the displaying the volume form and
+   * sets up the buttons in the that div
+   */
+  setupVolumeControl() {
+    let volumeDiv = createFaceplateDiv('VOLUME<br>&nbsp;',
+          this.controlWidth, this.controlHeight, this.ControlParent);
+    this.volumeSpan = createDisplaySpan(volumeDiv);
+        
+    let volumeDiv2 = createDiv();
+    volumeDiv2.parent(volumeDiv);
+    let volumeButtons = [];
+    for (let i = 0; i < this.volumeOptions.length; i++) {
+      let v = this.volumeOptions[i];// for some reason, waveOptions doesn't work in function call
+      let vVal = this.volumes[i];
+      volumeButtons[i] = createButton(v);  
+      volumeButtons[i].mousePressed(function() { setVolume(vVal);});
+      volumeButtons[i].style(this.buttonWidthStyle);
+      volumeButtons[i].parent(volumeDiv2);
+    }
+ 
+    this.volSlide = createSlider(0, 100, 50);
+    this.volSlide.style(this.slideWidthStyle);
+      this.volSlide.parent(volumeDiv);
+   
+    setVolume(50);  // osc volume   
+  } // end setupVolumeControl
+
+  /* How the volume slider, display and buttons work:
+   * The buttons use the global function setVolume() to set the osc volume,
+   * the slide value, and the displayed value = the currentVolume to
+   * specified value.
+   *
+   * The volume level is from 0 to 100 so it is divided by 100 before
+   * it is applied to the oscillator which requires 0-1 values.
+   */
+  setDisplay(vol) {
+    this.currentVolume = vol;
+    this.volumeSpan.html("&nbsp; " + vol + " &nbsp;");
+  }  // setDisplay
+
+  setSlider(vol) {
+    this.volSlide.value(vol);
+  }  // setSlider  
+
+} // end class
+
+/* Golbal functions
+*/
+/**
+ * Note: freq.freqSlide.value only takes on integer values so
+ * currentFreuency = displayed value may be a little diffent
+ * the slider value.
+ * If the difference is "large", then it is assumed that the
+ * slider has been moved and the frequency is reset to the 
+ * slider value.
+ */
+function respondToVolSliderMoved() {
+  let v = volume.volSlide.value(); 
+  if (abs(volume.currentVolume - v) > 2) {
+    setVolume(v);
+  }
+}  // end respondToVolSliderMoved
+
+/**
+ * Sets osc volume, the slider, the 
+ * displayed value = currentValue to "v".
+ */
+function setVolume(v) {   // sets master volume control
+  if (playing) { 
+    mixerGain.amp(v/100., 0.5);
+  }
+  volume.volume = v/100;
+  volume.volSlide.value(v);
+  volume.setDisplay(v);
+}  // end setVolume
+
+/**
+ * Returns the current volume/100 so it can be used in other
+ * parts of the program.
+ */
+function getVolume() {
+  return volume.currentVolume/100;
+} // end getVolume
+
+
+
+

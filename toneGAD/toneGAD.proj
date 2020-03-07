@@ -1,0 +1,11 @@
+"Project osc"
+//Double click to select file
+toneGAD.pjs
+frequencyControl.pjs
+waveControl.pjs
+volumeControl.pjs
+fftWaveFormControl.pjs
+modeControl.pjs
+harmonicsControl.pjs
+toneGAD.html
+toneGADHelp.html

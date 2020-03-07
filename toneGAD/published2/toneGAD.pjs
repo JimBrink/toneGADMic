@@ -1,15 +1,28 @@
-/**
- * Inspired by https://p5js.org/examples/sound-oscillator-frequency.html
- * but with many, many additions and modifications
- * Added multiple oscilators
- * Version 2.1.2
- *JB     3/7/2020   (Changed response to volume sliders)
- */
-
+ /* Original source: https://p5js.org/reference/#/p5.Oscillator 
+  * inspired by https://p5js.org/examples/sound-oscillator-frequency.html
+  * Added multiple oscilators 
+  * Version 2.0.0 
+  *JB      2/22/2020
+  */
+89889987
 let numOsc = 8;
 let mixerGain;
 let osc = [];
 let playing = false;
+/*
+let ctx, ctxOn;    // used to turn on audio
+
+function setup() {
+    ctx = getAudioContext();
+    ctxOn = createButton('turn on Audio');
+    ctxOn.mousePressed(() => {
+  	ctx.resume().then(() => {
+  	console.log('Audio Context is now ON');
+        ctxOn.hide();
+  	});
+    });
+
+*/
 
 function touchStarted() {
   if (getAudioContext().state !== 'running') {
@@ -24,7 +37,7 @@ function setup() {
   createCanvas(800, 380);
   backgroundColor = color(0,0,0);
   textAlign(CENTER);
-
+ 
   mixerGain = new p5.Gain();
   mixerGain.connect();
   for (let i = 0; i < numOsc; i++) {
@@ -37,24 +50,26 @@ function setup() {
   }
   osc[0].amp(.5);  // initially only osc[0] will play
   playing = false;
-
+  
   let panelHeight = 187;
-
-  modeCtrl = new ModeControl(140, panelHeight, 0);
+ 
+  modeCtrl = new ModeControl(100, panelHeight, 0);
   modeCtrl.setupControl();
-  volume = new VolumeControl(160, panelHeight, 0);
+  volume = new VolumeControl(200, panelHeight, 0);  
   volume.setupVolumeControl();
   wave = new WaveControl(130, panelHeight, 0);
   wave.setupWaveControl();
-  freq = new FrequencyControl(200, panelHeight, 0);
-  freq.setupFrequencyControl();
-  fftWaveForm = new FFTWaveFormControl(120, panelHeight, 0);
-  fftWaveForm.setupFFTWaveFormControl();
+  freq = new FrequencyControl(200, panelHeight, 0);  
+  freq.setupFrequencyControl();  
+  fftWaveForm = new FFTWaveFormControl(120, panelHeight, 0); 
+  fftWaveForm.setupFFTWaveFormControl(); 
   harmonic = new HarmonicControl(790, 0, 0);
   harmonic.setupHarmonicControl();
 
   turnSoundOff();
   mixerGain.amp(getVolume());
+ 
+//  setOnOff(getVolume());  
 }  // end setup
 
 function draw() {
@@ -63,22 +78,20 @@ function draw() {
   strokeWeight(10);
   stroke(192);
   rect(0, 0, width, height);
-
+  
   freq.respondToFreqSliderMoved()
+  respondToVolSliderMoved();
   fftWaveForm.drawFFTWaveFormControl();
-
-  drawMicDisplay();  // display mic info in center of canvas if mic has been on
-
 }  // end draw
 
 /**
  * Global functions
  */
-
+ 
 let faceplateTextColor = "gold";
 let faceplateBorderColor = "silver";
 let faceplateBackgroundColor = "black";
-
+ 
 /**
  * Creates a division for a Faceplate. The division has
  * a background color, border color, text color, name, and
@@ -96,7 +109,7 @@ function createFaceplateDiv(itsName, itsWidth, itsHeight, itsParent) {
         + "; border-width: 5px"
         + "; border-style: solid"
         + "; text-align: center"
-        + "; background-color: " + faceplateBackgroundColor
+        + "; background-color: " + faceplateBackgroundColor 
         + "; color: " + faceplateTextColor
         + "; border-color: " + faceplateBorderColor;
   if (itsWidth > 0) {
@@ -117,23 +130,15 @@ let displayBackgroundColor = "white";
 let displayTextColor = "red";
 
 /**
- * Creates an Display span in the parent and optional width.
- * If the width is specified, the span is displayed as an inline-block
- * and the text is centered.
- *  Used in other controls.
+ * Creates an Display span in the parent
  * Returns:
  *   Pointer to the span
  */
-function createDisplaySpan(itsParent, itsWidth) {
+function createDisplaySpan(itsParent) {
   let style = "text-align: center"
       + "; background-color: " + displayBackgroundColor
       + "; color: " + displayTextColor
       + "; font-size: x-large";
-  if (itsWidth != null) {
-     style += "; display: inline-block"
-          + "; width: " + itsWidth + "px"
-          + "; text-align: center";
-  }
   div = createDiv();
   div.parent(itsParent);
   let span = createSpan();
