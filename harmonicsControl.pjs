@@ -1,0 +1,194 @@
+/**
+ * This control allows the user to set the levels of several
+ * harmonics.
+ *
+ * James Brink     3/6/2020
+ */
+let harmonic; 
+let harmonicOnOffChecks = [];  // turn harmonic on/off
+let harmonicOnOffSpans = [];  // displays harmonic on/off
+let harmonicFreqSpans  = [];  // displays frequency of harmonic
+let harmonicVolSlides = [];   // controls volume of harmonic
+let harmonicVolSpans = [];  // display volume of harmonic
+let harmonicPlusMinusChecks = [];  // used to allow harmonic subtraction
+
+let envelope = [];
+
+let onString = "On";
+let offString = "Off"
+class HarmonicControl {
+  /**
+   * constructor where the colors are HTML/CSS color names
+   */
+  constructor(itsWidth, itsHeight, itsParent) {
+    this.controlWidth = itsWidth;
+    this.controlHeight = itsHeight;
+    this.controlParent = itsParent;
+    
+    this.harmonicDiv;
+  }  // end constructor
+   
+   setupHarmonicControl() {
+      let harmonDivs = [];
+      this.harmonicDiv = createFaceplateDiv('HARMONICS',
+                this.controlWidth, this.controlHeight, this.controlParent);
+      this.harmonicDiv.style("text-size: smaller; height: 200px; display:none;");
+      for (let i = 0; i < numOsc; i++) {
+          harmonDivs[i] =  createDiv();
+          let hd = harmonDivs[i];
+          hd.parent(this.harmonicDiv);
+          harmonDivs[i].style("height:18px");
+          let titleSpan = createSpan("Harmonic " + (i+1) + " &nbsp; ");  //label
+          titleSpan.parent(hd);
+          harmonicOnOffChecks[i] = createCheckbox("", false);   // on/off checkbox
+          harmonicOnOffChecks[i].parent(hd);
+          harmonicOnOffChecks[i].style("display: inline-block; ");
+          harmonicOnOffChecks[i].changed(function() {onOffChanged(i);});
+          harmonicOnOffSpans[i] = createSpan(offString);    // on/off label
+          harmonicOnOffSpans[i].style("width: 35px; text-align: center;"
+                                   + "display: inline-block");
+          harmonicOnOffSpans[i].parent(hd);
+          harmonicFreqSpans[i] = createSpan((round(100 * osc[i].getFreq()) / 100) 
+                       + " Hz");   // Hz display
+          harmonicFreqSpans[i].parent(hd);
+          harmonicFreqSpans[i].style("color:red; background-color: white;"
+                                        + " display: inline-block; width: 79px; height:16px");
+          let spacer1Span = createSpan(" &nbsp; ");        // spacer
+          spacer1Span.parent(hd);
+          harmonicVolSlides[i] = createSlider(0, 1000, 1000 * 1/(i+1));   // slider
+          harmonicVolSlides[i].parent(hd);
+          harmonicVolSlides[i].input(function () {harmonicVolSlideChanging(i)});
+          let spacer3Span = createSpan(" &nbsp; ");     // spacer
+          spacer3Span.parent(hd);
+          harmonicVolSpans[i] = createSpan(round(harmonicVolSlides[i].value())/10);     // vol display
+          harmonicVolSpans[i].parent(hd); 
+          harmonicVolSpans[i].style("color: green; background-color:white;"
+                             + " display: inline-block; width: 40px; height:16px");
+           
+      }
+      let spacer4Span = createSpan("<br>");     // spacer
+      spacer4Span.parent(this.harmonicDiv);
+      this.oneBtn = createButton("Set volume: 1");
+      this.oneBtn.parent(this.harmonicDiv);
+      this.oneBtn.style("height: 24px");
+      this.oneBtn.mousePressed(function () {overNPushed(0)});
+      this.overNBtn = createButton("Set volume: 1/n");
+      this.overNBtn.parent(this.harmonicDiv);
+      this.overNBtn.style("height: 24px");
+      this.overNBtn.mousePressed(function () {overNPushed(1)});
+      this.overN2Btn = createButton("Set volume: 1/n<sup>2</sup>");
+      this.overN2Btn.parent(this.harmonicDiv);
+      this.overN2Btn.style("height: 24px");
+      this.overN2Btn.mousePressed(function () {overNPushed(2)});
+      harmonicOnOffChecks[0].checked(true);
+      harmonicOnOffSpans[0].html(onString);
+      // set values
+     for (let i = 0; i < numOsc; i++) {
+       envelope[i] = new p5.Envelope();
+      }
+    // however setADSR and setRange will be set each time a note is played
+  }  // setupHarmonicControl()
+
+}  // end setupHarmonicControl
+    
+function  setOnOff(vol0)  {
+    for (let i = 0; i < numOsc; i++ )  {
+       if (vol0 == 0) {  // off mode
+          harmonicOnOffChecks[0].checked(false);   // but osc[0] is off
+          harmonicOnOffSpans[0].html("Off");
+       }  else { // tone and harmonic mode
+          harmonicOnOffChecks[0].checked (true);
+          harmonicOnOffSpans[0].html("On");
+       }
+  }  // end setOnOff  
+}  // class harmonicControl
+            
+/**
+ * This functions called every time the slide is changed OR when the
+ * correspondin plus/minuscheckbox changed 
+ */
+function harmonicVolSlideChanging(i) {
+  let vol = harmonicVolSlides[i].value();
+  vol = map(vol, volumeSliderMax, 0, volumeDisplayMax, volumeDisplayMin);
+  harmonicVolSpans[i].html(round(10 * vol)/10);
+  if (playing && harmonicOnOffChecks[i].checked()) {
+     if (modeCtrl.mode == "piano") {
+          envelope[i].triggerAttack();
+     } else {
+         osc[i].amp(vol/100);
+     }
+  }
+}  // end harmonicVolSlideChanged
+
+function onOffChanged(i) {
+  if ( harmonicOnOffChecks[i].checked()) {
+    harmonicOnOffSpans[i].html("On");
+    if (playing) {
+       if (modeCtrl.mode == "piano") {
+          envelope[i].triggerAttack();
+       } else if (modeCtrl.mode != "off"){
+          osc[i].amp(harmonicVolSpans[i].html()/100, .5);
+       }
+     }
+  } else {
+    harmonicOnOffSpans[i].html("Off");
+    if (modeCtrl.mode == "piano") {
+       envelope[i].triggerRelease();
+    } else {
+       osc[i].amp(0, .3);
+    }
+  }
+}  // end onOffChanged
+
+function turnSoundOn() {
+  for (let i = 0; i < numOsc; i++) {
+     if (harmonicOnOffChecks[i].checked()) {
+        if (modeCtrl.mode == "piano") {
+        // sounds will not be turned until a key is pressed and processed in
+        // keyboard control  
+         } else  if (modeCtrl.mode != "Off") {
+               osc[i].amp(harmonicVolSpans[i].html()/100);
+         }
+     } else {
+        osc[i].amp(0, .1);
+     }
+  }
+}  //turn soundOn
+
+function turnSoundOff() {
+  for (let  i = 0; i < numOsc; i++) {
+     osc[i].amp(0, .3);
+  }
+} // turnSoundOff
+
+function overNPushed(p) {
+  for (let i = 0; i < numOsc; i++) {
+    let v = 100/pow(i+1, p);
+    if (p == 2 && (volumeDisplayMin < 0) && (round(i/2)  == 1  || round(i/2) == 3)) {
+       v = -v;
+     }       
+     harmonicSetVolume(v, i);
+  }
+}  // overNPushed
+
+function harmonicInvertChanged() {
+  for (let i = 0; i < numOsc; i++) {
+     let v = abs(harmonicVolSpans[i].html());
+     harmonicSetVolume(v, i);
+   }
+  if (volumeDisplayMin < 0) {
+     harmonic.overN2Btn.html("Set volume: &#177 1/n<sup>2</sup>");
+  } else {
+     harmonic.overN2Btn.html("Set volume: 1/n<sup>2</sup>");
+  }   
+}  
+     
+function harmonicSetVolume(v, i) {
+  let sliderPos = map(v, volumeDisplayMax, volumeDisplayMin, volumeSliderMax, 0);
+  harmonicVolSlides[i].value(sliderPos);
+  harmonicVolSpans[i].html(round(10 * v)/10);
+  if (playing && harmonicOnOffChecks[i].checked()) {
+     osc[i].amp(v/100);
+   }
+}  // setVolume
+     
