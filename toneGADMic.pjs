@@ -2,7 +2,7 @@
  * Inspired by https://p5js.org/examples/sound-oscillator-frequency.html
  * but with many, many additions and modifications
  * Added multiple oscilators
- * Version 2.1.2
+ * Version 2.1.3
  *JB     3/7/2020   (Changed response to volume sliders)
  */
 
@@ -21,7 +21,9 @@ function touchStarted() {
 }
 
 function setup() {
-  createCanvas(800, 380);
+  let canvas =   createCanvas(800, 380);
+  canvas.parent("display");
+  
   backgroundColor = color(0,0,0);
   textAlign(CENTER);
 
@@ -52,7 +54,7 @@ function setup() {
   fftWaveForm.setupFFTWaveFormControl();
   harmonic = new HarmonicControl(790, 0, 0);
   harmonic.setupHarmonicControl();
-
+ 
   turnSoundOff();
   mixerGain.amp(getVolume());
 }  // end setup
@@ -107,8 +109,9 @@ function createFaceplateDiv(itsName, itsWidth, itsHeight, itsParent) {
   }
    let div = createDiv(itsName);
   if (itsParent != 0) {
-    div.parent = itsParent;
+    div.parent(itsParent);
   }
+              div.parent("display");
   div.style(style);
   return div;
 } // end createFaceplateDiv

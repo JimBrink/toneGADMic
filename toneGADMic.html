@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Revised 3/7/2020 -->
+<!-- Revised 3/8/2020 -->
 <html>
 <head>
   <title>ToneGAD with Mic</title>
@@ -10,30 +10,34 @@
   <style>
     body {background-color: #EEEEEE; width: 810px}
     h1 {color: #0000FF; text-align:center}
-     .floatRight {float: right}
+    .floatRight {float: right}
   </style>
+  <style id = "theDisplay">.display {transform: scale(1)}</style>
   <script src="p5.min.js"></script>
   <script src="p5.sound.min.js"></script>
 
-   <script src="harmonicsControl.pjs"></script>
+  <script src="harmonicsControl.pjs"></script>
   <script src="toneGADMic.pjs"></script>
   <script src="waveControl.pjs"></script>
   <script src="frequencyControl.pjs"></script>
   <script src="volumeControl.pjs"></script>
   <script src="fftWaveFormControl.pjs"></script>
   <script src="modeControlMic.pjs"></script> 
-  <script src="file:///E:/p5js/listMembers.pjs"></script>
 </head>
 <body>
-<h1>ToneGAD with Microphone<br>
+<div class = "display">
+  <h1>ToneGAD with Microphone<br>
       <span style="font-size:smaller">Tone Generator and Display</span></h1>
-<p>The page <a href = "toneGADHelpMic.html">Help for ToneGAD with Mic</a>
- includes information about the toneGAD sketch.  You may
-find it useful to have both pages open in your browser so you can switch back and
-forth between the information here and the actual sketch.   Or possibly better yet,
-open the two pages in different browsers and arrange them side by side if your screen
-is wide enough.</p>
-
-
+  The page <a href = "toneGADHelpMic.html">Help for ToneGAD with Mic</a>
+  includes information about the toneGAD sketch.  You may
+  find it useful to have both pages open in your browser so you can switch back and
+  forth between the information here and the actual sketch.   Or possibly better yet,
+  open the two pages in different browsers and arrange them side by side if your screen
+  is wide enough.<br>
+  <button type = "button" onclick= 
+      'document.getElementById("theDisplay").innerHTML = ".display {transform: scale(.72)}";'
+      >Reduce page size to fit screen.</button>
+</div>
+<div id = "display" class = "display"></div>
 </body>
 </html>
