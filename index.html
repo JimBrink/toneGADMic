@@ -1,42 +1,89 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html lang="en">
 <head>
-  <title>index</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="">
-  <meta name="keywords" content="">
-  <meta name="ROBOTS" content="INDEX, FOLLOW">
-  <link rel="stylesheet" href="index.css" />
-<!--  <script src="http://www.brinkje.com/p5js/p5.min.js"></script>
-  <script src="http://www.brinkje.com/p5js/p5.sound.js"></script>
-  <script src="http://www.brinkje.com/p5js/listMembers.pjs"></script>
-  <script src="index.pjs"></script>  -->
+  <title>p5.js files</title>
+  <meta charset="UTF-8" >
   <style>
-   body {width: 700px; background-color: #C0C0C0; border: width:5px; border:style: solid; border-color: blue;
-     padding: 75px;}
-   h1 {text-align: center; color: blue;}
+   body {background-image: url(http://brinkje.com/pl61.gif); 
+             background-repeat: repeat; 
+             background-color: #ffffcc;
+             color: #000000;
+            width: 800px; }
+   a:link {color: #0000ff}
+   a:visited {color: #ff0099}
+   a:active {color: #336633}
+   img.difference {width: 120px; height: 140px}
+   h1 {color: blue; text-align: center}
+   .green {color: green}
+   .cyan {color: #00BBFF}
+   .maroon {color: maroon}
+   .floatRight {float: right; margin-left: 20px; margin-right: 20px}
   </style>
 </head>
 <body>
-<center><h1>toneGAD with Mic</h1>
-              <h2>Tone Generator and Display<br>
-                    with Microphone Input<br><br> </h2></center>
-<p><center><a href = "toneGADMic.html">Tone Generator and Display (version 2.1.4)</a>
-       </center>
-<p> A tool
-       that can generate sounds and display their wave form and harmonics. The
-      <a href = "toneGADHelpMic.html"> help file</a> contains a tour of the 
+  <h1>p5.js Files</h1> 
+  <div class="floatRight ">
+    <img class="difference"  src="http://brinkje.com/babb2.jpg" alt="Babbage'sDifference Engine"> 
+             <br>Babbage's Difference<br>Engine (circa 1832)
+  </div>
+  <p>This folder contains some p5.js files that might be of interest.  Included are some possibly
+   useful programs, some demo files, and some some how-to files related to p5.js.</p>
+  <p>The p5.js files have the file type .pjs.  My editor has special features for different languages.
+   It determines the language based on the file type which makes it desirable to distinguish between
+   true Javascript .js files and p5.js files. In order to do so, the file type .pjs is being used for p5.js files.
+  </p>
+  <p>The .pjs files assume the necessary p5.js include files are in "/p5js".  If you decide to copy the
+   files to your own computer, you may have to edit the names of those files in the &lt;script&gt; section.
+  <p> 
+
+  <p class = "maroon">Not many options at this point.  Some more files should be coming soon.</p>
+  <ul>
+    <li><a href = "http://www.brinkje.com/p5js/toneGAD/GraphingSeries.html">Graphing converging Fourier Sine Series</a>
+       Helps illustrate the convergence of Fourier Series by graphing partial series sums
+       for three common series.</li>
+<!--
+    <li><a href = "https://jimbrink.github.io/toneGADMic/toneGADMic.html">
+      Tone Generator and Display with Mic (version 2.1.4)</a> 
+       A tool
+       that can generate sounds and display their wave form and harmonics. 
+       It also allows microphone input.  You will need a microphone attached
+      to your computer to take advantage of this added feature.  
+       <a href = "https://jimbrink.github.io/toneGADMic/toneGADHelpMic.html">Its help file</a>
+        contains a tour of the 
       controls, discussion of the importance of harmonics and their use, and some
-      experiments.</p>
-     <p> This version allows you to input sounds with your computer microphone.
-      Their wave form will be shown along with their harmonics.</p>
-<p>Special note:  To input sounds, you need a microphone which may be built into a
-      laptop but connected separately if you have a desktop.  But even if you don't have
-      one it will still generate sounds and show their wave forms and harmonics.</p>
-<p>If you don't want to use a microphone, you may prefer to use regular version of
-     <a href = "http://brinkje.com/p5js/toneGAD/toneGAD.html">toneGAD</a> and its
-     <a href = "http://brinkje.com/p5js/toneGAD/toneGADHelp.html">help file</a>.
+      experiments.</li>  
+-->
+    <li><a href = "http://www.brinkje.com/p5js/HowTo/index.html">"How-To"</a> Files relating to using  p5.js</li>
+  </ul>
+
+  <p>The following two programs have been tested with Firefox, Chrome, 
+      Opera and the new Edge browsers. They may not work with the
+      Edge Legacy browser.  They have not been tested with Safari. The are
+      not intended to be used and have not been tested on smart phones.</p>
+  <ul>
+      <li><a href = "http://www.brinkje.com/p5js/toneGAD/toneGAD.html">
+        Tone Generator and Display (version 2.1.5)</a>
+        A tool
+       that can generate sounds and display their wave form and harmonics. The
+      <a href = "http://www.brinkje.com/p5js/toneGAD/toneGADHelp.html"> 
+      help file</a> contains a tour of the 
+      controls, discussion of the importance of harmonics and their use, and some
+      experiments.</p></li>
+    <li><a href = "https://jimbrink.github.io/toneGADMic/toneGAD.html?mic">
+      Tone Generator and Display with Mic (version 2.1.5)</a> This the same as
+      the above but it also allows microphone input.  You will need a microphone attached
+      to your computer to take advantage of this added feature.  
+       <a href = "https://jimbrink.github.io/toneGADMic/toneGADHelp.html?mic">
+      Its help file</a></li>  
+  <!-- 2.0 introduced harmonics
+         2.1 allowed inversion
+         2.1.3 introduced reduce size button
+         2.1.4 moved the canvas/display up when reduced, made On/Off in harmonics
+                clickable
+         2.1.5 Consolodated files, minor help corrections -->
+  </ul>
+  <p>James Brink<br> Revised:  3/13/2020
+ </ul>
 
 </body>
 </html>
