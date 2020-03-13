@@ -2,7 +2,7 @@
  * This control allows the user to set the levels of several
  * harmonics.
  *
- * James Brink     3/9/2020,     replaced OnOff spans by clickable labels 
+ * James Brink     3/10/2020,     replaced OnOff spans by clickable labels 
  */
 let harmonic; 
 let harmonicOnOffChecks = [];  // turn harmonic on/off   - these are js - not p5js
@@ -49,7 +49,7 @@ class HarmonicControl {
                        + " Hz");   // Hz display
           harmonicFreqSpans[i].parent(hd);
           harmonicFreqSpans[i].style("color:red; background-color: white;"
-                                        + " display: inline-block; width: 79px; height:16px");
+                                        + " display: inline-block; width: 115px; height:16px");
           let spacer1Span = createSpan(" &nbsp; ");        // spacer
           spacer1Span.parent(hd);
           harmonicVolSlides[i] = createSlider(0, 1000, 1000 * 1/(i+1));   // slider
@@ -178,7 +178,7 @@ function harmonicInvertChanged() {
   } else {
      harmonic.overN2Btn.html("Set volume: 1/n<sup>2</sup>");
   }   
-}  
+}  //  harmonicInvertChanged
      
 function harmonicSetVolume(v, i) {
   let sliderPos = map(v, volumeDisplayMax, volumeDisplayMin, volumeSliderMax, 0);
@@ -187,7 +187,7 @@ function harmonicSetVolume(v, i) {
   if (playing && harmonicOnOffChecks[i].checked) {
      osc[i].amp(v/100);
    }
-}  // setVolume
+}  //  harmonicSetVolume
 
 
 // function for 3rd method that creates the span/checkbox/label.  Also sets parent.
@@ -208,15 +208,6 @@ function createSpanCheck(i, f, par) {
   let ret = [chk, lab];
   return ret;
 }  // createSpanCheck
-
-// 
-function checkChanged(chk, lab) {
-   if (chk.checked) {
-     lab.innerHTML = onString;
-   } else {
-     lab.innerHTML = offString;
-   }
-}
 
 
      

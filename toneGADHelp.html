@@ -1,8 +1,10 @@
 <!DOCTYPE HTML>
 <html lang="en">
-<!-- Revised 2/22/2020 -->
+<!-- Revised 3/12/2020 -->
 <head>
-  <title>toneGAD help</title>
+  <title id = "mic1">toneGAD help</title>
+
+      
   <meta charset="UTF-8" >
   <style>
     body {background-color: #EEEEEE;}
@@ -21,10 +23,14 @@
   </style>
 </head>
 <body>
+<p><i>If the toneGAD display panel is too large to fit your screen especially after using the Harmonics mode,
+  try clicking the "Reduce page size to fit screen" button.</i></p>
 <h1>ToneGAD<br>
-      <span style="font-size:smaller">Tone Generator and Display</span>
-     <br><br>Guided Tour and Some Information About Harmonics</h1>
-<p>This page includes information about <a href = "toneGAD.html">The toneGAD sketch</a>.  You may
+      <span style="font-size:smaller" id = "mic6">Tone Generator and Display</span>
+     <br><br>A Guided Tour and Some Information About Harmonics</h1>
+<p>This page includes information about 
+<span id = "mic5"><a href = "toneGAD.html">The toneGAD</a></span>  sketch.  
+You may
 find it useful to have both pages open in your browser so you can switch back and
 forth between the information here and the actual sketch.   Or possibly better yet,
 open the two pages in different browsers and arrange them side by side if your screen
@@ -41,10 +47,18 @@ is wide enough.</p>
 <h3>The Controls</h3>
 <p>It is suggested that you begin the tour with a fresh copy of the program.  You can
   press <b>Reload</b> or <b>Refresh</b>, if needed.
+<div id = "mic2">
 <h4>Mode</h4>
 <p>In the "Mode" panel there are four options:  "Off", "Tone", "Piano", and "Harmonics".
  The program
   starts with the "Off" mode and nothing happens until you select one of the other modes.</p>
+</div>
+<div id = "mic3">
+<h4>Mode</h4>
+<p>In the "Mode" panel there are five options:  "Off", "Tone", "Piano", "Harmonics",
+  and "Microphone".  The program
+  starts with the "Off" mode and nothing happens until you select one of the other modes.</p>
+</div>
 <p>In the "Tone" mode, a tone will start to immediately
   (assuming your speakers are on).   The tone can be controlled by
   the other controls.  To turn the tone off, switch to either the "Off" or "Piano" mode.
@@ -202,7 +216,7 @@ is wide enough.</p>
 
 <h3>The Piano mode</h3>
 <p>The piano mode allow you to individual play individual notes using keyboard keys
-  To see the keys that work, just click the "Piano Note Notes" button.  You will see
+  To see the keys that work, just click the "Piano Note Keys" button.  You will see
   there are two ways.  You can use the note names like "a", "b", ..., in lower case while
   capping a letter to gets you its sharp (for those keys that have sharps).  In some cases,
   it is more convenient to use the top row of keys on a standard keyboard which include
@@ -246,6 +260,24 @@ is wide enough.</p>
   the different harmonics at various intensity levels.</p>
 <p>What about the "Set volume ..." buttons?  They will be useful in the Experiments
   section.</p>
+<div id="mic4">
+  <h3>The Microdphone mode</h3>
+  <p>When you turn on the microphone mode the first time, your browser will ask you
+    if it is OK if this program uses your microphone.  The browser is trying to protect
+    you from rouge programs that might secretly turn on your mic and send any sound
+    it picks up over the internet without your knowledge. A microphone symbol indicating
+    a microphone is allowed will probably appear near the top of the browser.
+    (This action is similar to the
+    action it takes if the program wants to use your camera.)
+    But this program only displays the analysis of any sound it picks up.</p>
+  <p>The first time you turn on the mic, microphone level slider appears in the
+    mode control and some information about the microphone
+    level appears between the two graphic displays. This information continues
+    to be displayed even if you switch to different mode.</p>
+  <p>Then you will have to turn up the mic volume control to a point where the
+    right hand red light in the microphone display lights occasionally.</p>
+  <p>When you are in the microphone mode, all tone generation is turned off..</p>
+</div>
 <button id= "enhanceButton" onclick='toggle(0)'>Close this section</button>
 </div>
 <!-- *************************** end the tour ********************* -->
@@ -371,7 +403,7 @@ is wide enough.</p>
   harmonics, often referred to as <b>overtones</b> in this context, enhance almost
   all music.  Harmonics (or overtones) help explain why a trumpet sounds different
   than a guitar or flute even they are holding on the same note.</p>
-<p>Did you find that sine wave sound boring?  They are just too pure.  If you played
+<p>Did you find that sine waves sound boring?  They are just too pure.  If you played
   much in the piano mode on this program, you might have found yourself preferring
   to use one of the other wave forms even though they are not really nice sounding.
   Even the human voice is enriched by harmonics.</p>
@@ -464,6 +496,12 @@ is wide enough.</p>
   subtracted from the 1st harmonic?</p>
 <p>You may want to experiment with other harmonics and volumes.</p>
 <h4>The 2nd experiment:  Creating complex wave forms.</h4>
+<p><i>This experiment does not always work properly.  Most recently the problem has occurred
+  with the new version of Bing but even with that browser, it has sometimes worked as expected.
+  Perhaps the problem is the oscillators associated with the various harmonics are not 
+  synchronized to each other properly.  If you do not see a nice pattern in the wave forms in this
+  experiment it is suggested that you try a different browser, if possible.  In all honesty, I expected
+  this problem before I began testing the experiment and am surprised that it normally works.</i></p>
 <p><b>Discussion:</b>  In this experiment, we will show that it reasonable to think that
    sawtooth and square waves can be approximated by using harmonics of the fundamental
   frequency.</p>
@@ -539,12 +577,12 @@ The version, source files and author.</p>
 
 <div id = "formalities" style = "display: none" class = "aDiv"></p>
 <!-- ********************* formalities section ***************** -->
-<p>Version 2.1.2, 3/7/2020.  This is a draft version and improvements are expected.  2.0 introduced
+<p>Version 2.1.b5, 3/13/2020.  This is a draft version and improvements are expected.  2.0 introduced
    the harmonic control and the separate help page. 2.1 allows volumes to be negative and the waves
    to be inverted.<p>
 <p>The source files:
-<br><a href = "toneGAD.pjs">toneGad.pjs</a>  The main program.</a>
-<br><a href = "modeControl.pjs">modeConrol.pjs</a>  Code for
+<br><a href = "toneGAD.pjs">toneGadMic.pjs</a>  The main program.</a>
+<br><a href = "modeControl.pjs">modeControl.pjs</a>  Code for
          mode control and keyboard keys.</a>
 <br><a href = "waveControl.pjs">Controller for the wave selection.</a>
 <br><a href = "volumeControl.pjs">Controller for volume.</a>
@@ -560,11 +598,34 @@ The version, source files and author.</p>
 <br><a href = "Images/celloSpectrum.png">Images/celloSpectrum.png</a>
 <br><a href = "Images/guitarSpectrum.gif">Images/guitarSpectrum.pif</a>
 <br><a href = "Images/piano2.png">Images/piano2.png</a>
-<br>
-<br><a href = "toneGAD.zip">Zip file for all of the above along with this help file.</a>
-</p>
+<p> <button id= "formalitiesButton" onclick='toggle(5)'>+/-</button>
+Downloading considerations.</p>
+<div id = "download"  style = "display: none">
+Should you prefer to run this program locally, you can download all the necessary
+files using
+<br><a href = "http://brinkje.com/p5js/toneGAD/toneGAD.zip">
+Zip file for all of the above along with this help file.</a>
+<br>Here are some considerations to keep in mind:
+<ul>
+  <li>My p5js files use the file extension ".pjs" because it helps my text editor
+    distinguish them from standard javascript files.  If you prefer, you can
+    change the file types to ".js" as long as you remember to change
+    them in the "toneGAD.html" file as well.</li>
+  <li>There are two versions of this program because some people may
+    not have a microphone or want to deal with the complications caused by
+    microphones.  However, both versions use the same files.  The 
+    non-microphone version is the default.  To use mics, just add "?mic"
+    to the URL of the .html files.</li>
+  <li>These programs do not work locally with the Edge Legacy browser but
+    do with the new version.  They have not been tested with Internet
+    Explorer or Safari.  They have been tested with up-to-date versions
+    of Firefox, Chrome, and Opera as of 3/12/2020 by just loading the
+    file into a browser using "file///..." protocol.</li>
+</ul>
+</div><!-- end of download div -->
+<!-- ******************************************* -->
 <p>Comments, suggestions, corrections:
-   <a href="mailto:brinkje@plu.edu">James Brink</a>, &nbsp; &nbsp; &nbsp; 3/7/2020</p>
+   <a href="mailto:brinkje@plu.edu">James Brink</a></p>
  <button id= "formalitiesButton" onclick='toggle(3)'>Close this section</button>
 
 
@@ -580,6 +641,7 @@ The version, source files and author.</p>
     divs[2] = document.getElementById("enhance");
     divs[3] = document.getElementById("formalities");
     divs[4] = document.getElementById("experiment");
+    divs[5] = document.getElementById("download");
 
     function toggle(n) {
       if (divs[n].style.display == 'block') {
@@ -588,7 +650,32 @@ The version, source files and author.</p>
          divs[n].style.display = 'block';
       }
    }  // end toggle
-  </script
+  </script>
+  <script>
+    mic =window.location.search == "?mic"
+    let micro1 = document.getElementById("mic1");   // switches
+    let micro2 = document.getElementById("mic2");   // no mic
+    let micro3 = document.getElementById("mic3");  // with mic
+    let micro4 = document.getElementById("mic4");  // with mic
+    let micro5 = document.getElementById("mic5");  // switches
+    let micro6 = document.getElementById("mic6");   // switches
+    if (mic) {
+      micro1.innerHTML = "toneGADMic help";
+      micro2.style = "display: none";
+      micro3.style = "display: block";
+      micro4.style = "display: block";
+      micro5.innerHTML
+        = '<a href = "toneGAD.html?mic">The toneGAD with mic</a>';
+      micro6.innerHTML
+        = 'Tone Generator and Display with Microphone';
+    }  else {
+      micro1.innerHTML = "toneGAD help";
+      micro2.style = "display: block";
+      micro3.style = "display: none";
+      micro4.style = "display: none";
+    }
+
+ </script>
 </body>
 </html>
 </body>

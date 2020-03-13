@@ -6,7 +6,7 @@
  * 
  * It includes two global functions at the end of this file.
  * 
- * JB   3/5/2020  (added fixed width to span display)
+ * JB   3/12/2020  (added fixed width to span display)
  */
  
  let frequency;     // fequency shown in display

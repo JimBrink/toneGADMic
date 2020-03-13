@@ -1,0 +1,329 @@
+/* This class creates a mode control in a div.  The user can select from the
+ * different modes.
+ *
+ *This control also includes code concerning the keyboard.
+ *
+ * JB   3/12/2020
+ */
+let attackTime = 0.01;
+let decayTime = 0.2;
+let releaseTime = 0.4;
+let releaseLevel = 0;
+
+let aKeyIsDown = false;
+let micAudioIn = null;
+let micVolume = 0;  // used for mic lights
+let option = window.location.search;
+
+
+class ModeControl {
+  /**
+   * constructor where the colors are HTML/CSS color names or values
+   */
+  constructor(itsWidth, itsHeight, itsParent)
+  {
+    // save some arguments
+    this.divWidth = itsWidth;
+    this.divHeight = itsHeight;
+    this.divParent = itsParent;
+    this.hintButton;  // hint about piano keys
+    this.mode = "off";
+
+  } // end constructor
+  /**
+   * Creates a div for the ...
+   */
+  setupControl() {
+    let modeCtrlDiv = createFaceplateDiv('MODE', this.divWidth,
+        this.divHeight, this.divParent);
+
+    let checkDiv = createDiv();
+    checkDiv.parent(modeCtrlDiv);
+    checkDiv.style("text-align: left");
+    this.offModeCheck = createCheckbox("Off", true);
+    this.offModeCheck.parent(checkDiv);
+    this.offModeCheck.changed(offModeCheck);
+    this.toneModeCheck = createCheckbox("Tone", false);
+    this.toneModeCheck.parent(checkDiv);
+    this.toneModeCheck.changed(toneModeCheck);
+    this.pianoModeCheck = createCheckbox("Piano", false);
+    this.pianoModeCheck.parent(checkDiv);
+    this.pianoModeCheck.changed(pianoModeCheck);
+    this.harmonicsModeCheck = createCheckbox("Harmonics", false);
+    this.harmonicsModeCheck.parent(checkDiv);
+    this.harmonicsModeCheck.changed(harmonicsModeCheck);
+    this.micDiv = createDiv();
+    this.micDiv.parent(checkDiv);
+    this.micDiv.style("display: none");
+    this.micModeCheck = createCheckbox("Microphone", false);
+    this.micModeCheck.parent(this.micDiv);
+    this.micModeCheck.changed(micModeCheck);
+   
+    if (option == "?mic") {
+      let micVolLbl = createSpan("Mic volume");
+      micVolLbl.parent(this.micDiv);
+      micVolLbl.style("text-size:8px");
+      this.micVolSlide = createSlider(0, 100, 0);
+      this.micVolSlide.parent(this.micDiv);
+      this.micVolSlide.input(micVolSlideInput);
+      this.micVolSlide.style("width: 135px;");
+      this.micDiv.style("display: block");
+    }  else {
+      let spaceDiv2 = createDiv("&nbsp;");
+      spaceDiv2.parent(modeCtrlDiv);
+    }
+  //   spaceDiv.parent(modeCtrlDiv);
+
+    this.hintButton = createButton("Piano Note Keys");
+    this.hintButton.mousePressed(hintButton);
+    this.hintButton.parent(modeCtrlDiv);
+    this.hintButton.style("width: " + (.92 * this.divWidth) + "px");
+
+  }  // end setupControl
+
+
+} // class KeyBoardControl
+
+function turnAllChecksOff() {
+  modeCtrl.offModeCheck.checked(false);  // just in case check when true
+  modeCtrl.toneModeCheck.checked(false);
+  modeCtrl.pianoModeCheck.checked(false);
+  modeCtrl.harmonicsModeCheck.checked(false);
+  modeCtrl.micModeCheck.checked(false);
+}  // turnAllChecksOff
+
+function offModeCheck() {
+  if (aKeyIsDown) {  // if one changes the mode while a "piano" key is playing
+    keyReleased();   // the note continues to play and it is difficult to get it to stop.
+  }                            //   So pretend the key has been released.
+  modeCtrl.mode = "off";
+  turnAllChecksOff();
+  modeCtrl.offModeCheck.checked(true)
+  playing = false;
+  turnSoundOff();
+
+}  // clickOffMode
+
+function toneModeCheck() {
+  if (aKeyIsDown) {
+    keyReleased();
+  }
+  modeCtrl.mode = "tone";
+  turnMicOff();
+  turnAllChecksOff();
+  modeCtrl.toneModeCheck.checked(true);
+  playing = true;
+  turnSoundOn();
+}  // clickToneMode
+
+function pianoModeCheck() {
+  modeCtrl.mode = "piano";
+  turnAllChecksOff();
+  modeCtrl.pianoModeCheck.checked(true);
+  playing = false;
+  turnSoundOff();
+  // sounds are turned on only when a key is typed and held down
+  freq.selectMultiplierButton(2);  // set multipler button to 1
+}  // clickPianoMode
+
+function harmonicsModeCheck() {
+  if (aKeyIsDown) {
+    keyReleased();
+  }
+  modeCtrl.mode = "harmonics";
+  harmonic.harmonicDiv.style("display:block");  // display the harmonic controls
+  //                                                                                     if needed
+  turnMicOff();
+  setWaveType("sine");
+  turnAllChecksOff();
+  modeCtrl.harmonicsModeCheck.checked(true);
+  playing = true;
+  turnSoundOn();
+} // harmonicsModeCheck
+
+function micModeCheck() {
+  if (aKeyIsDown) {
+    keyReleased();
+  }
+  modeCtrl.mode = "mic";
+  modeCtrl.micDiv.style("display:block");
+  turnSoundOff();
+  turnAllChecksOff();
+  modeCtrl.micModeCheck.checked(true);
+  playing = false;
+  turnSoundOn();
+  setupMic();
+} // micModeCheck
+
+// ** functions for the mic mode **
+
+// turns the mic off by setting gain to 0.
+function turnMicOff() {
+  if (micAudioIn != null) {
+     micAudioIn.amp(0);  // turns mic off
+  }
+}  //  turnMicOff
+
+/**
+ * set the mic's gain correspoinding to slide value
+ */
+function micVolSlideInput() {
+  micVolume = modeCtrl.micVolSlide.value()/100;
+  if (modeCtrl.mode == "mic") {
+     micAudioIn.amp(micVolume);
+  }
+}  // micVolSlideInput
+
+/**
+ * Sets up the mic.  If the mic is not already on, it creates and starts it. If
+ * it already is on, it just sets the initial mic gain according to the mic volume
+ * slide.
+ */
+function setupMic() {
+  if (micAudioIn == null) {
+     try {
+        micAudioIn = new p5.AudioIn();
+       micAudioIn.start();
+       } catch(err) {
+        alert("Cannot start" + "\n" +err + "\n" + err.name + "\n" + err.message);
+     }
+      micAudioIn.connect(mixerGain);
+  }
+
+  micAudioIn.amp(micVolume);
+//  listMembersArray(micAudioIn.gain);
+
+}  // setupMic
+
+/**
+ * this draw function is called by the main draw method.
+ */
+function drawMicDisplay() {
+if (micAudioIn != null) {
+  if (modeCtrl.micVolSlide.value() == 0) {
+     fill(color(80, 80, 255));
+     stroke(color(0, 0, 255))
+     rect(250, 80, 300, 80);
+     fill(color(255, 255, 0));
+     noStroke();
+     text("You will need to turn up the Mic Volume"
+           + "\nuntil the right red light blinks occacionally"
+           + "\nat normal sound levels.", 400, 105);
+
+  }1
+  // mic volume lights
+  let c = [];
+  c[0] = color(255, 255, 0);
+  c[1] = color(255, 192, 0);
+  c[2] = color(192, 255, 0);
+  c[3] = color(0, 255, 0);
+  c[4] = color(255, 80, 0);
+  c[5] = color(255, 0, 0);
+
+  let h = 195;
+  let v = micAudioIn.getLevel();
+  fill(color(255, 255, 255));
+  noStroke();
+  text("Mic volume (" + (round(1000 * v) /1000) + ")", 200, h);
+  for (let i = 0; i < 6; i++) {
+     if (v >= .025 * i + .060) {
+        fill(c[i]);
+     } else {
+        fill(255);
+     }
+     ellipse(350 + 20 * i, h-3, 7);
+  }
+  text( "Mic vol slide setting: " + modeCtrl.micVolSlide.value(), 600, h);
+  }
+} // drawMicDisplay
+
+// functions for the piano
+//
+// when a key is typed, interpret key, determine midi, and change frequency
+function keyTyped() {
+  if (modeCtrl.mode === "piano") {
+    aKeyIsDown = true;
+    freq.selectMultiplierButton(2);  // set multipler button to 1
+    let m = interpretCh(key);
+    if (m >= 0) {
+      let f = midiToFreq(interpretCh(key));    // interpretCh returns midi
+      freq.setSlider(f);
+      for (let i = 0; i < numOsc; i++) {
+         osc[i].freq((i + 1) * f);  // make sure the harmonic is ready to use
+         let vol = harmonicVolSpans[i].html()/100;
+         let attackVol = min(2 * vol, 1);
+         envelope[i].setADSR(attackTime, decayTime, vol, releaseTime);
+         envelope[i].setRange(attackVol, releaseLevel);
+         osc[i].amp(envelope[i]);
+         if (harmonicOnOffChecks[i].checked) { // but only turn on if harmonic is on
+            envelope[i].triggerAttack();
+         }
+       }
+      playing = true;
+    }
+  }
+}
+
+// when a key is released, turn of the key and clear the display
+function keyReleased() {
+  if (modeCtrl.mode === "piano") {
+    aKeyIsDown = false;
+    playing = false;
+    for (let i = 0; i < numOsc; i++) {
+       envelope[i].triggerRelease();
+    }
+    interpretCh("");
+    playing = false;
+  }
+  freq.selectMultiplierButton(2);  // set multipler button to 1
+}
+
+function hintButton() {
+  let helpText =
+              "Tone Key(s)   Tone Key(s)"
+        + "\n  B           `"
+        + "\n  C      c, 1         C#      C, 2"
+        + "\n  D      d, 3         D#      D, 4"
+        + "\n  E      e, 3"
+        + "\n  F       f,  5         F#       F, 6"
+        + "\n  G      g, 7         G#      G, 8"
+        + "\n  A       a, 9         A#       A, 0"
+        + "\n  B       b, -"
+        + "\n  C           =";
+  alert(helpText);
+} // hintButton
+
+function interpretCh(aCh) {
+  let midi;
+  switch(aCh) {
+    case 'c': display = "C"; midi = 60; break;
+    case 'C': display = "C#"; midi = 61; break;
+    case 'd': display = "D"; midi = 62; break;
+    case 'D': display = "D#"; midi = 63; break;
+    case 'e': display = "E"; midi = 64; break;
+    case 'f': display = "F"; midi = 65; break;
+    case 'F': display = "F#"; midi = 66; break;
+    case 'g': display = "G"; midi = 67; break;
+    case 'G': display = "G#"; midi = 68; break;
+    case 'a': display = "A"; midi = 69; break;
+    case 'A': display = "A#"; midi = 70; break;
+    case 'b': display = "B"; midi = 71; break;
+    case '`': display = "Bv"; midi = 59; break;
+    case '1': display = "C#"; midi = 61; break;
+    case '2': display = "D"; midi = 62; break;
+    case '3': display = "D#"; midi = 63; break;
+    case '4': display = "E"; midi = 64; break;
+    case '5': display = "F"; midi = 65; break;
+    case '6': display = "F#"; midi = 66; break;
+    case '7': display = "G"; midi = 67; break;
+    case '8': display = "G#"; midi = 68; break;
+    case '9': display = "A"; midi = 69; break;
+    case '0': display = "A#"; midi = 70; break;
+    case '-': display = "B"; midi = 71; break;
+    case '=': display = "C^"; midi = 72; break;
+    default:  display = "rest"; midi = -1;
+  }
+  return midi;
+}  // interpretCh
+
+

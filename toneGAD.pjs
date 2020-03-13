@@ -1,0 +1,144 @@
+/**
+ * Inspired by https://p5js.org/examples/sound-oscillator-frequency.html
+ * but with many, many additions and modifications
+ * Added multiple oscilators
+ * Version 2.1.3
+ *JB     3/7/2020   (Changed response to volume sliders)
+ */
+
+let numOsc = 8;
+let mixerGain;
+let osc = [];
+let playing = false;
+
+function touchStarted() {
+  if (getAudioContext().state !== 'running') {
+    getAudioContext().resume();
+    alert("Your browser used the first click on this page to turn on the audio capabilities"
+        + " of this program.  You may now continue in the normal fashion." );
+  }
+  // return false;
+}
+
+function setup() {
+  let canvas =   createCanvas(800, 380);
+  canvas.parent("display");
+
+  backgroundColor = color(0,0,0);
+  textAlign(CENTER);
+
+  mixerGain = new p5.Gain();
+  mixerGain.connect();
+  for (let i = 0; i < numOsc; i++) {
+     osc[i] = new p5.Oscillator();
+     osc[i].setType('sine');
+     osc[i].amp(0);
+     osc[i].start();
+     osc[i].disconnect();
+     osc[i].connect(mixerGain);
+  }
+  osc[0].amp(.5);  // initially only osc[0] will play
+  playing = false;
+
+  let panelHeight = 187;
+
+  modeCtrl = new ModeControl(140, panelHeight, 0);
+  modeCtrl.setupControl();
+  volume = new VolumeControl(160, panelHeight, 0);
+  volume.setupVolumeControl();
+  wave = new WaveControl(130, panelHeight, 0);
+  wave.setupWaveControl();
+  freq = new FrequencyControl(200, panelHeight, 0);
+  freq.setupFrequencyControl();
+  fftWaveForm = new FFTWaveFormControl(120, panelHeight, 0);
+  fftWaveForm.setupFFTWaveFormControl();
+  harmonic = new HarmonicControl(790, 0, 0);
+  harmonic.setupHarmonicControl();
+
+  turnSoundOff();
+  mixerGain.amp(getVolume());
+}  // end setup
+
+function draw() {
+  background(backgroundColor);
+  fill (backgroundColor);
+  strokeWeight(10);
+  stroke(192);
+  rect(0, 0, width, height);
+
+  freq.respondToFreqSliderMoved()
+  fftWaveForm.drawFFTWaveFormControl();
+  drawMicDisplay();
+}  // end draw
+
+/**
+ * Global functions
+ */
+
+let faceplateTextColor = "gold";
+let faceplateBorderColor = "silver";
+let faceplateBackgroundColor = "black";
+
+/**
+ * Creates a division for a Faceplate. The division has
+ * a background color, border color, text color, name, and
+ * optionally width, height, and parent.
+ * Parameters:
+ * itsName:  name written at top of division
+ * itsWidth:  width of division (optional, unspecified if <=0)
+ * itsHeight: height of division (optional, unspecified if <=0)
+ * itsParent: parent into division is placed.  (optional, unused if =0)
+ * Returns
+ * pointer to division
+ */
+function createFaceplateDiv(itsName, itsWidth, itsHeight, itsParent) {
+  let style =  "float: left"
+        + "; border-width: 5px"
+        + "; border-style: solid"
+        + "; text-align: center"
+        + "; background-color: " + faceplateBackgroundColor
+        + "; color: " + faceplateTextColor
+        + "; border-color: " + faceplateBorderColor;
+  if (itsWidth > 0) {
+    style += "; width: " + itsWidth + "px";
+  }
+  if (itsHeight > 0) {
+    style += "; height: " + itsHeight + "px";
+  }
+   let div = createDiv(itsName);
+  if (itsParent != 0) {
+    div.parent(itsParent);
+  }
+              div.parent("display");
+  div.style(style);
+  return div;
+} // end createFaceplateDiv
+
+let displayBackgroundColor = "white";
+let displayTextColor = "red";
+
+/**
+ * Creates an Display span in the parent and optional width.
+ * If the width is specified, the span is displayed as an inline-block
+ * and the text is centered.
+ *  Used in other controls.
+ * Returns:
+ *   Pointer to the span
+ */
+function createDisplaySpan(itsParent, itsWidth) {
+  let style = "text-align: center"
+      + "; background-color: " + displayBackgroundColor
+      + "; color: " + displayTextColor
+      + "; font-size: x-large";
+  if (itsWidth != null) {
+     style += "; display: inline-block"
+          + "; width: " + itsWidth + "px"
+          + "; text-align: center";
+  }
+  div = createDiv();
+  div.parent(itsParent);
+  let span = createSpan();
+  span.parent(div);
+  span.style(style);
+  return span;
+}  // end createDisplaySpan

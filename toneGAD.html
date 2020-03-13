@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<!-- Revised 3/9/2020 Version 2.1-->
+<!-- Revised 3/12/2020 --><!-- Revised to unify mic and nonmic versions-->
 <html>
 <head>
-  <title>ToneGAD</title>
+  <title id = "mic1">ToneGAD</title>
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">  <meta name="description" content="">
   <meta name="keywords" content="">
@@ -10,41 +10,46 @@
   <style>
     body {background-color: #EEEEEE; width: 810px}
     h1 {color: #0000FF; text-align:center}
-     .floatRight {float: right}
-  </style>
-   <style id = "theDisplay">.display {transform: scale(1)}</style>
-   <style id = "heading">.heading {transform: scale(1)}</style>
-
+    .floatRight {float: right}
+   </style>
+  <style id = "theDisplay">.display {transform: scale(1)}</style>
   <script src="p5.min.js"></script>
   <script src="p5.sound.min.js"></script>
- 
+
+  <script src="modeControl.pjs"></script>
+  <script src="waveControl.pjs"></script>
+  <script src="volumeControl.pjs"></script>
+  <script src="frequencyControl.pjs"></script>
+  <script src="fftWaveFormControl.pjs"></script>
   <script src="harmonicsControl.pjs"></script>
   <script src="toneGAD.pjs"></script>
-  <script src="waveControl.pjs"></script>
-  <script src="frequencyControl.pjs"></script>
-  <script src="volumeControl.pjs"></script>
-  <script src="fftWaveFormControl.pjs"></script>
-  <script src="modeControl.pjs"></script>
 </head>
 <body>
-<div class = "heading">
-  <h1>ToneGAD<br>
+<div class = "display">
+<h1><span id = "mic2">ToneGAD</span><br>
       <span style="font-size:smaller">Tone Generator and Display</span></h1>
-  The page <a href = "toneGADHelp.html">Help for ToneGAD</a>
-   includes information about the toneGAD sketch.  You may
-  find it useful to have both pages open in your browser so you can switch back and
-  forth between the information here and the actual sketch.   Or possibly better yet,
-  open the two pages in different browsers and arrange them side by side if your screen
-  is wide enough.<br>
-  <button type = "button" onclick= 
-      'document.getElementById("theDisplay").innerHTML 
-                       = ".display {transform:scale(.72)  translateY(-100px)}";
-      document.getElementById("heading").innerHTML 
-                       = ".heading {transform:scale(.72)}";';
-      
-                    
-      >Reduce page size to fit screen.</button>
+The page <span id = "mic3"><a href = "toneGADHelp.html">Help for ToneGAD</span></a>
+ includes information about the toneGAD sketch.  You may
+find it useful to have both pages open in your browser so you can switch back and
+forth between the information here and the actual sketch.   Or possibly better yet,
+open the two pages in different browsers and arrange them side by side if your screen
+is wide enough.<br>
+<button type = "button" onclick=
+    'document.getElementById("theDisplay").innerHTML = ".display {transform: scale(.78)}";'>
+    Reduce page size to fit screen.</button>
 </div>
+
 <div id = "display" class = "display"></div>
+<script>
+if (window.location.search == "?mic") {
+    let micro1 = document.getElementById("mic1"); 
+    let micro2 = document.getElementById("mic2");
+    let micro3 = document.getElementById("mic3");
+    micro1.innerHTML = "toneGAD with Mic";
+    micro2.innerHTML = "ToneGAD with Microphone";   
+    micro3.innerHTML = '<a href = "toneGADHelp.html?mic">Help for ToneGAD with Mic</a>';
+}
+</script>
+
 </body>
 </html>
